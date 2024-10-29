@@ -296,7 +296,7 @@ public class ConduitBundleBlock extends Block implements EntityBlock, SimpleWate
     public static void handleShiftYeta(PlayerInteractEvent.RightClickBlock event) {
         if (event.getItemStack().is(EIOTags.Items.WRENCH)
             && event.getLevel().getBlockEntity(event.getPos()) instanceof ConduitBundleBlockEntity blockEntity
-            && event.getEntity().isCrouching()) {
+            && event.getEntity().isSteppingCarefully()) {
 
             Holder<Conduit<?>> conduit = blockEntity.getShape().getConduit(event.getPos(), event.getHitVec());
             if (conduit != null) {
