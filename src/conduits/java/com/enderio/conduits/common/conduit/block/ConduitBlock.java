@@ -277,7 +277,7 @@ public class ConduitBlock extends Block implements EntityBlock, SimpleWaterlogge
     public static void handleShiftYeta(PlayerInteractEvent.RightClickBlock event) {
         if (event.getItemStack().is(EIOTags.Items.WRENCH)
             && event.getLevel().getBlockEntity(event.getPos()) instanceof ConduitBlockEntity conduit
-            && event.getEntity().isCrouching()) {
+            && event.getEntity().isSteppingCarefully()) {
 
             @Nullable ConduitType<?> type = conduit.getShape().getConduit(event.getPos(), event.getHitVec());
             if (type != null) {
