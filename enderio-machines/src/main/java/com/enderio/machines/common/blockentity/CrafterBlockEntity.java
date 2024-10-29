@@ -19,6 +19,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -43,22 +44,13 @@ public class CrafterBlockEntity extends PoweredMachineBlockEntity {
     private RecipeHolder<CraftingRecipe> recipe;
     private final Queue<ItemStack> outputBuffer = new ArrayDeque<>();
 
-    private static final CraftingContainer DUMMY_CRAFTING_CONTAINER = new TransientCraftingContainer(new AbstractContainerMenu(null, -1) {
-        @Override
-        public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
-            return ItemStack.EMPTY;
-        }
-
-        @Override
-        public boolean stillValid(Player pPlayer) {
-            return false;
-        }
-    }, 3, 3);
-
-
     public CrafterBlockEntity(BlockPos worldPosition, BlockState blockState) {
         super(EnergyIOMode.Input, ENERGY_CAPACITY, ENERGY_USAGE, MachineBlockEntities.CRAFTER.get(), worldPosition, blockState);
         getInventoryNN().addSlotChangedCallback(this::onSlotChanged);
+    }
+
+    private CraftingInput getCraftingInput(MultiSlotAccess sourceSlots) {
+        return CraftingInput.of(3, 3, sourceSlots.getItemStacks(getInventoryNN()));
     }
 
     private void onSlotChanged(int slot) {
@@ -68,12 +60,11 @@ public class CrafterBlockEntity extends PoweredMachineBlockEntity {
     }
 
     private void updateRecipe() {
-        for (int i = 0; i < 9; i++) {
-            DUMMY_CRAFTING_CONTAINER.setItem(i, GHOST.get(i).getItemStack(this).copy());
-        }
+        var input = getCraftingInput(GHOST);
+
         recipe = getLevel()
             .getRecipeManager()
-            .getRecipeFor(RecipeType.CRAFTING, DUMMY_CRAFTING_CONTAINER.asCraftInput(), getLevel()).orElse(null);
+            .getRecipeFor(RecipeType.CRAFTING, input, getLevel()).orElse(null);
         PREVIEW.setStackInSlot(this, ItemStack.EMPTY);
 
         if (recipe != null) {
@@ -177,8 +168,9 @@ public class CrafterBlockEntity extends PoweredMachineBlockEntity {
     }
 
     private Optional<ItemStack> getRecipeResult() {
-        if (recipe != null && recipe.value().matches(DUMMY_CRAFTING_CONTAINER.asCraftInput(), getLevel())) {
-            return Optional.of(recipe.value().assemble(DUMMY_CRAFTING_CONTAINER.asCraftInput(), getLevel().registryAccess()));
+        var input = getCraftingInput(INPUT);
+        if (recipe != null && recipe.value().matches(input, getLevel())) {
+            return Optional.of(recipe.value().assemble(input, getLevel().registryAccess()));
         }
         return Optional.empty();
     }
@@ -194,14 +186,12 @@ public class CrafterBlockEntity extends PoweredMachineBlockEntity {
                 return;
             }
         }
-        //copy input items
-        for (int i = 0; i < 9; i++) {
-            DUMMY_CRAFTING_CONTAINER.setItem(i, INPUT.get(i).getItemStack(this).copy());
-        }
+        //get input
+        var input = getCraftingInput(INPUT);
         //craft
         clearInput();
-        outputBuffer.add(recipe.value().assemble(DUMMY_CRAFTING_CONTAINER.asCraftInput(), getLevel().registryAccess()));
-        outputBuffer.addAll(recipe.value().getRemainingItems(DUMMY_CRAFTING_CONTAINER.asCraftInput()));
+        outputBuffer.add(recipe.value().assemble(input, getLevel().registryAccess()));
+        outputBuffer.addAll(recipe.value().getRemainingItems(input));
         // clean buffer
         outputBuffer.removeIf(ItemStack::isEmpty);
         // consume power
