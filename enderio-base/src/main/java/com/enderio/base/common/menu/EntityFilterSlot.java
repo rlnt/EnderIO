@@ -20,7 +20,7 @@ public class EntityFilterSlot extends FilterSlot<StoredEntityData> {
     @Override
     public Optional<StoredEntityData> getResourceFrom(ItemStack itemStack) {
         if (itemStack.is(EIOTags.Items.ENTITY_STORAGE)) {
-            StoredEntityData ghost = itemStack.get(EIODataComponents.STORED_ENTITY);
+            StoredEntityData ghost = itemStack.getOrDefault(EIODataComponents.STORED_ENTITY, StoredEntityData.EMPTY);
             return Optional.of(ghost);
         } else if (itemStack.getItem() instanceof SpawnEggItem spawnEggItem) {
             Entity entity = spawnEggItem.getType(itemStack).create(Minecraft.getInstance().level);

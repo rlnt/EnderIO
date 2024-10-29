@@ -80,6 +80,8 @@ public class AlloySmeltingCategory extends MachineRecipeCategory<RecipeHolder<Al
 
         if (!inputs.isEmpty()) {
             builder.addSlot(INPUT, 1, 11).addItemStacks(Arrays.stream(inputs.get(0).getItems()).toList());
+        } else {
+            builder.addSlot(RENDER_ONLY, 1, 11);
         }
 
         if (inputs.size() > 1) {
