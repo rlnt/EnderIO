@@ -8,12 +8,15 @@ import com.enderio.base.common.integrations.jei.category.FireCraftingCategory;
 import com.enderio.base.common.integrations.jei.extension.ShapedEntityStorageCategoryExtension;
 import com.enderio.base.common.integrations.jei.subtype.EntityStorageSubtypeInterpreter;
 import com.enderio.base.common.item.misc.BrokenSpawnerItem;
-import com.enderio.base.common.lang.EIOLang;
 import com.enderio.base.common.recipe.ShapedEntityStorageRecipe;
+import com.enderio.core.client.gui.screen.EIOScreen;
+import java.util.ArrayList;
+import java.util.List;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IGuiHelper;
+import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
@@ -24,11 +27,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @JeiPlugin
 public class EnderIOJEI implements IModPlugin {
@@ -47,7 +45,8 @@ public class EnderIOJEI implements IModPlugin {
 
     @Override
     public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration registration) {
-        registration.getCraftingCategory().addExtension(ShapedEntityStorageRecipe.class, new ShapedEntityStorageCategoryExtension());
+        registration.getCraftingCategory()
+                .addExtension(ShapedEntityStorageRecipe.class, new ShapedEntityStorageCategoryExtension());
     }
 
     @Override
@@ -71,6 +70,11 @@ public class EnderIOJEI implements IModPlugin {
     public void registerItemSubtypes(ISubtypeRegistration registration) {
         registration.registerSubtypeInterpreter(EIOItems.FILLED_SOUL_VIAL.get(), new EntityStorageSubtypeInterpreter());
         registration.registerSubtypeInterpreter(EIOItems.BROKEN_SPAWNER.get(), new EntityStorageSubtypeInterpreter());
+    }
+
+    @Override
+    public void registerGuiHandlers(IGuiHandlerRegistration registration) {
+        registration.addGhostIngredientHandler(EIOScreen.class, new FilterGhostIngredientHandler());
     }
 
     // region Utilities
