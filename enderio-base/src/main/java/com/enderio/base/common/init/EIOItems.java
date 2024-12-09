@@ -108,22 +108,19 @@ public class EIOItems {
     public static final RegiliteItem<CapacitorItem> BASIC_CAPACITOR = ITEM_REGISTRY
         .registerItem("basic_capacitor",
             props -> new CapacitorItem(
-                props.component(EIODataComponents.CAPACITOR_DATA, CapacitorData.simple(1))),
-            new Item.Properties().stacksTo(1))
+                props.component(EIODataComponents.CAPACITOR_DATA, CapacitorData.simple(1))))
         .setTab(EIOCreativeTabs.MAIN);
 
     public static final RegiliteItem<CapacitorItem> DOUBLE_LAYER_CAPACITOR = ITEM_REGISTRY
         .registerItem("double_layer_capacitor",
             props -> new CapacitorItem(
-                props.component(EIODataComponents.CAPACITOR_DATA, CapacitorData.simple(2))),
-            new Item.Properties().stacksTo(1))
+                props.component(EIODataComponents.CAPACITOR_DATA, CapacitorData.simple(2))))
         .setTab(EIOCreativeTabs.MAIN);
 
     public static final RegiliteItem<CapacitorItem> OCTADIC_CAPACITOR = ITEM_REGISTRY
         .registerItem("octadic_capacitor",
             props -> new CapacitorItem(
-                props.component(EIODataComponents.CAPACITOR_DATA, CapacitorData.simple(3))),
-            new Item.Properties().stacksTo(1))
+                props.component(EIODataComponents.CAPACITOR_DATA, CapacitorData.simple(3))))
         .setTab(EIOCreativeTabs.MAIN);
 
     public static final RegiliteItem<LootCapacitorItem> LOOT_CAPACITOR = ITEM_REGISTRY
