@@ -1,6 +1,8 @@
 package com.enderio.base.common.init;
 
 import com.enderio.EnderIOBase;
+import com.enderio.base.common.network.C2SSetFluidFilterSlot;
+import com.enderio.base.common.network.C2SSetItemFilterSlot;
 import com.enderio.base.common.network.ClientPayloadHandler;
 import com.enderio.base.common.network.FilterUpdatePacket;
 import com.enderio.base.common.network.RequestTravelPacket;
@@ -22,29 +24,35 @@ public class EIONetwork {
 
     @SubscribeEvent
     public static void register(final RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar(EnderCore.MOD_ID)
-            .versioned(PROTOCOL_VERSION);
+        final PayloadRegistrar registrar = event.registrar(EnderCore.MOD_ID).versioned(PROTOCOL_VERSION);
 
         registrar.playToClient(SyncTravelDataPacket.TYPE, SyncTravelDataPacket.STREAM_CODEC,
-            ClientPayloadHandler.getInstance()::handleSyncTravelDataPacket);
+                ClientPayloadHandler.getInstance()::handleSyncTravelDataPacket);
 
         registrar.playToClient(TravelTargetUpdatedPacket.TYPE, TravelTargetUpdatedPacket.STREAM_CODEC,
-            ClientPayloadHandler.getInstance()::handleAddTravelTarget);
+                ClientPayloadHandler.getInstance()::handleAddTravelTarget);
 
         registrar.playToClient(TravelTargetRemovedPacket.TYPE, TravelTargetRemovedPacket.STREAM_CODEC,
-            ClientPayloadHandler.getInstance()::handleRemoveTravelTarget);
+                ClientPayloadHandler.getInstance()::handleRemoveTravelTarget);
 
         registrar.playToClient(ServerToClientLightUpdate.TYPE, ServerToClientLightUpdate.STREAM_CODEC,
-            ClientPayloadHandler.getInstance()::handleLightUpdate);
+                ClientPayloadHandler.getInstance()::handleLightUpdate);
 
-        registrar.playToServer(UpdateCoordinateSelectionNameMenuPacket.TYPE, UpdateCoordinateSelectionNameMenuPacket.STREAM_CODEC,
-            ServerPayloadHandler.getInstance()::handleCoordinateSelectionName);
+        registrar.playToServer(UpdateCoordinateSelectionNameMenuPacket.TYPE,
+                UpdateCoordinateSelectionNameMenuPacket.STREAM_CODEC,
+                ServerPayloadHandler.getInstance()::handleCoordinateSelectionName);
 
         registrar.playToServer(RequestTravelPacket.TYPE, RequestTravelPacket.STREAM_CODEC,
-            ServerPayloadHandler.getInstance()::handleTravelRequest);
+                ServerPayloadHandler.getInstance()::handleTravelRequest);
 
         registrar.playToServer(FilterUpdatePacket.TYPE, FilterUpdatePacket.STREAM_CODEC,
                 ServerPayloadHandler.getInstance()::handleFilterUpdate);
+
+        registrar.playToServer(C2SSetFluidFilterSlot.TYPE, C2SSetFluidFilterSlot.STREAM_CODEC,
+                ServerPayloadHandler.getInstance()::handleSetFluidFilterSlot);
+
+        registrar.playToServer(C2SSetItemFilterSlot.TYPE, C2SSetItemFilterSlot.STREAM_CODEC,
+                ServerPayloadHandler.getInstance()::handleSetItemFilterSlot);
     }
-    
+
 }
