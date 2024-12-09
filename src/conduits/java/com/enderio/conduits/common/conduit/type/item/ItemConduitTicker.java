@@ -77,9 +77,11 @@ public class ItemConduitTicker extends CapabilityAwareConduitTicker<ItemConduitD
                     }
 
                     ItemStack notInserted = ItemHandlerHelper.insertItem(insert.capability, extractedItem, false);
-                    if (notInserted.getCount() < extractedItem.getCount()) {
-                        extracted += extractedItem.getCount() - notInserted.getCount();
-                        extractHandler.extractItem(i, extracted, false);
+                    int successfullyInserted = extractedItem.getCount() - notInserted.getCount();
+
+                    if (successfullyInserted > 0) {
+                        extracted += successfullyInserted;
+                        extractHandler.extractItem(i, successfullyInserted, false);
                         if (extracted >= speed) {
                             if (sidedExtractData.isRoundRobin) {
                                 sidedExtractData.rotatingIndex = insertIndex + 1;
