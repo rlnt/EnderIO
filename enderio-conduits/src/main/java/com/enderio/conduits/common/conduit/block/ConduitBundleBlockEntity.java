@@ -397,8 +397,8 @@ public class ConduitBundleBlockEntity extends EnderBlockEntity {
     /**
      * sets block to air if this is the last conduit
      */
-    public void removeTypeAndDelete(Holder<Conduit<?>> conduit) {
-        if (removeType(conduit, false)) {
+    public void removeTypeAndDelete(Player player, Holder<Conduit<?>> conduit) {
+        if (removeType(conduit, !player.getAbilities().instabuild)) {
             level.setBlock(getBlockPos(), getBlockState().getFluidState().createLegacyBlock(),
                 level.isClientSide ? Block.UPDATE_ALL_IMMEDIATE : Block.UPDATE_ALL);
         }

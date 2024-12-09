@@ -300,7 +300,7 @@ public class ConduitBundleBlock extends Block implements EntityBlock, SimpleWate
 
             Holder<Conduit<?>> conduit = blockEntity.getShape().getConduit(event.getPos(), event.getHitVec());
             if (conduit != null) {
-                blockEntity.removeTypeAndDelete(conduit);
+                blockEntity.removeTypeAndDelete(event.getEntity(), conduit);
                 if (event.getLevel() instanceof ServerLevel serverLevel) {
                     Inventory inventory = event.getEntity().getInventory();
                     inventory.placeItemBackInInventory(ConduitBlockItem.getStackFor(conduit, 1));
