@@ -210,7 +210,7 @@ public class EIOLang {
     
     // region KeyBindings
     public static final Component KEYBINDING_CATEGORY = REGISTRATE.addLang("keybinding", EnderIO.loc("category"), "EnderIO");
-    public static final Component KEYBINDING_MODE_SWITCH = REGISTRATE.addLang("keybinding", EnderIO.loc("mode_change"), "Mode Change Key");
+    public static final Component KEYBINDING_PROBE_MODE = REGISTRATE.addLang("keybinding", EnderIO.loc("probe_mode"), "Change Probe Mode");
     
     // endregion
 

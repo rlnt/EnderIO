@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = EnderIO.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class KeyBindings {
     public static final KeyMapping MODE_CHANGE = new KeyMapping(
-        "keybinding.enderio.mode_change", 
+        "keybinding.enderio.probe_mode",
         KeyConflictContext.IN_GAME, 
         InputConstants.getKey(InputConstants.KEY_Y, -1),
         "keybinding.enderio.category"
