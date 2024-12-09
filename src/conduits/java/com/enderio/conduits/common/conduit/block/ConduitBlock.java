@@ -295,7 +295,7 @@ public class ConduitBlock extends Block implements EntityBlock, SimpleWaterlogge
 
             @Nullable ConduitType<?> type = conduit.getShape().getConduit(event.getPos(), event.getHitVec());
             if (type != null) {
-                conduit.removeTypeAndDelete(type);
+                conduit.removeTypeAndDelete(event.getEntity(), type);
                 if (event.getLevel() instanceof ServerLevel serverLevel) {
                     Inventory inventory = event.getEntity().getInventory();
                     inventory.placeItemBackInInventory(new ItemStack(type.getConduitItem()));
