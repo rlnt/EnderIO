@@ -89,7 +89,7 @@ public class FluidConduitTicker extends CapabilityAwareConduitTicker<FluidCondui
         if (shouldReset) {
             for (var loadedNode : loadedNodes) {
                 FluidConduitData fluidExtendedData = loadedNode.getOrCreateData(ConduitTypes.Data.FLUID.get());
-                fluidExtendedData.setLockedFluid(null);
+                fluidExtendedData.setLockedFluid(Fluids.EMPTY);
             }
         }
         super.tickGraph(level, conduit, loadedNodes, graph, coloredRedstoneProvider);
