@@ -64,6 +64,8 @@ public class XPObeliskBlockEntity extends MachineBlockEntity implements FluidTan
 
             @Override
             public int fill(FluidStack resource, FluidAction action) {
+                // TODO: Avoid filling beyond 2,147,483,640 (INT_MAX - 7) to avoid having 7mb that cannot be extracted?
+
                 // Convert into XP Juice
                 if (TANK.isFluidValid(this, resource)) {
                     var currentFluid = TANK.getFluid(this).getFluid();
@@ -89,40 +91,85 @@ public class XPObeliskBlockEntity extends MachineBlockEntity implements FluidTan
         return fluidHandler;
     }
 
-    public void addLevelToPlayer(int levelDiff, Player player) {
-        int requestedLevel = player.experienceLevel + levelDiff;
-        requestedLevel = Math.max(requestedLevel, 0);
-        long playerXP = ExperienceUtil.getPlayerTotalXp(player);
-        long requestedXP = ExperienceUtil.getTotalXpFromLevel(requestedLevel) - playerXP;
-        int storedXP = TANK.getFluidAmount(this) / ExperienceUtil.EXP_TO_FLUID;
-
-        long awardXP = levelDiff > 0 ? Math.min(storedXP, requestedXP) : requestedXP;
-        awardXP(awardXP, player);
+    public void addLevelsToPlayer(Player player, int levelsToAdd) {
+        long playerExperience = ExperienceUtil.getPlayerTotalXp(player);
+        long targetExperience = ExperienceUtil.getTotalXpFromLevel(player.experienceLevel + levelsToAdd);
+        addPlayerXp(player, targetExperience - playerExperience);
     }
 
-    public void addAllLevelToPlayer(boolean give, Player player) {
-        long awardXP;
-        if (give) {
-            awardXP = TANK.getFluidAmount(this) / ExperienceUtil.EXP_TO_FLUID;
-        } else {
-            awardXP = -ExperienceUtil.getPlayerTotalXp(player);
+    public void removeLevelsFromPlayer(Player player, int levelsToRemove) {
+        long playerExperience = ExperienceUtil.getPlayerTotalXp(player);
+        long targetExperience = ExperienceUtil.getTotalXpFromLevel(Math.max(0, player.experienceLevel - levelsToRemove));
+        removePlayerXp(player, playerExperience - targetExperience);
+    }
+
+    public void addAllXpToPlayer(Player player) {
+        long experienceToGive = TANK.getFluidAmount(this) / ExperienceUtil.EXP_TO_FLUID;
+        addPlayerXp(player, experienceToGive);
+    }
+
+    public void removeAllXpFromPlayer(Player player) {
+        long playerExperience = ExperienceUtil.getPlayerTotalXp(player);
+        removePlayerXp(player, playerExperience);
+    }
+
+    private void addPlayerXp(Player player, long experience) {
+        if (experience < 0) {
+            throw new IllegalArgumentException("experience cannot be negative");
         }
 
-        awardXP(awardXP, player);
+        // Convert to volume
+        long volume = experience * ExperienceUtil.EXP_TO_FLUID;
+
+        // Reduce to int safely, and remove any fluid that will not make the conversion
+        int cappedVolume = (int) Math.min(Integer.MAX_VALUE, volume);
+        cappedVolume = cappedVolume - cappedVolume % ExperienceUtil.EXP_TO_FLUID;
+
+        // Drain the fluid
+        FluidStack drained = TANK.drain(this, cappedVolume, IFluidHandler.FluidAction.EXECUTE);
+
+        // Add the XP to the player
+        // Workaround some floating point problems when adding all the exp at once.
+        // If we add it all at once, the experienceProgress gets messed up and then the next extract is wonky.
+        int xpToAdd = drained.getAmount() / ExperienceUtil.EXP_TO_FLUID;
+        while (xpToAdd > 0) {
+            int xp = Math.min(xpToAdd, (int)Math.floor((1 - player.experienceProgress) * ExperienceUtil.getXpNeededForNextLevel(player.experienceLevel)));
+            player.giveExperiencePoints(xp);
+            xpToAdd -= xp;
+        }
     }
 
-    public void awardXP(long exp, Player player) {
-        long volumeToRemove = exp * ExperienceUtil.EXP_TO_FLUID;
-        // Positive -> Give levels to player ; Negative -> Take levels from player
-        if (volumeToRemove > 0) {
-            int cappedVolume = (int) Math.min(Integer.MAX_VALUE, volumeToRemove);
-            FluidStack drained = TANK.drain(this, cappedVolume, IFluidHandler.FluidAction.EXECUTE);
-            player.giveExperiencePoints(drained.getAmount() / ExperienceUtil.EXP_TO_FLUID);
+    private void removePlayerXp(Player player, long experience) {
+        if (experience < 0) {
+            throw new IllegalArgumentException("experience cannot be negative");
+        }
 
-        } else {
-            int cappedVolume = (int) Math.min(Integer.MAX_VALUE, -volumeToRemove); // Invert
-            int filled = TANK.fill(this, new FluidStack(EIOFluids.XP_JUICE.getSource(), cappedVolume), IFluidHandler.FluidAction.EXECUTE);
-            player.giveExperiencePoints(-1 * filled / ExperienceUtil.EXP_TO_FLUID); // Negative -> Take
+        // Convert to volume
+        long volume = experience * ExperienceUtil.EXP_TO_FLUID;
+
+        // Reduce to int safely, and remove any fluid that will not make the conversion
+        int cappedVolume = (int) Math.min(Integer.MAX_VALUE, volume);
+        cappedVolume = cappedVolume - cappedVolume % ExperienceUtil.EXP_TO_FLUID;
+
+        // Add the fluid
+        int filled = TANK.fill(this, new FluidStack(EIOFluids.XP_JUICE.getSource(), cappedVolume), IFluidHandler.FluidAction.EXECUTE);
+
+        // Remove the XP from the player
+        // Workaround some floating point problems when adding all the exp at once.
+        // If we add it all at once, the experienceProgress gets messed up and then the next extract is wonky.
+        int xpToRemove = filled / ExperienceUtil.EXP_TO_FLUID;
+        while (xpToRemove > 0) {
+            int xp;
+
+            // Remove current level progress, then strip back level-by-level.
+            if (player.experienceProgress > 0) {
+                xp = Math.min(xpToRemove, (int)Math.floor(player.experienceProgress * ExperienceUtil.getXpNeededForNextLevel(player.experienceLevel)));
+            } else {
+                xp = Math.min(xpToRemove, ExperienceUtil.getXpNeededForNextLevel(player.experienceLevel - 1));
+            }
+
+            player.giveExperiencePoints(-xp);
+            xpToRemove -= xp;
         }
     }
 
