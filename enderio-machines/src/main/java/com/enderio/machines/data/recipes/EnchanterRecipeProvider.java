@@ -68,7 +68,7 @@ public class EnchanterRecipeProvider extends RecipeProvider {
         build(enchantmentRegistry, Enchantments.SWEEPING_EDGE, SizedIngredient.of(Tags.Items.INGOTS_IRON, 8), 1, recipeOutput);
         //new
         build(enchantmentRegistry, Enchantments.CHANNELING, SizedIngredient.of(Items.LIGHTNING_ROD, 1), 1, recipeOutput);
-        build(enchantmentRegistry, Enchantments.IMPALING, SizedIngredient.of(Tags.Items.INGOTS_IRON, 8), 1, recipeOutput);
+        build(enchantmentRegistry, Enchantments.IMPALING, SizedIngredient.of(Tags.Items.STORAGE_BLOCKS_IRON, 1), 1, recipeOutput);
         build(enchantmentRegistry, Enchantments.LOYALTY, SizedIngredient.of(Items.LEAD, 1), 1, recipeOutput);
         build(enchantmentRegistry, Enchantments.MULTISHOT, SizedIngredient.of(ItemTags.ARROWS, 16), 1, recipeOutput);//TODO
         build(enchantmentRegistry, Enchantments.PIERCING, SizedIngredient.of(Tags.Items.GEMS_PRISMARINE, 8), 1, recipeOutput);
