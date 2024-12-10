@@ -16,7 +16,7 @@ public record C2SSetItemFilterSlot(int containerId, int slotIndex, ItemStack ite
 
     @Override
     public boolean isValid(NetworkEvent.Context context) {
-        if (context.getSender() != null) {
+        if (context.getSender() == null) {
             return false;
         }
 

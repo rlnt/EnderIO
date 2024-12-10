@@ -16,7 +16,7 @@ public record C2SSetFluidFilterSlot(int containerId, int slotIndex, FluidStack f
 
     @Override
     public boolean isValid(NetworkEvent.Context context) {
-        if (context.getSender() != null) {
+        if (context.getSender() == null) {
             return false;
         }
 
