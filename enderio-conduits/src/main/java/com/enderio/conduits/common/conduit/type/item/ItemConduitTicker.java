@@ -26,12 +26,12 @@ public class ItemConduitTicker extends CapabilityAwareConduitTicker<ItemConduit,
             IItemHandler extractHandler = extract.capability();
             int extracted = 0;
 
-            nextItem: for (int i = 0; i < extractHandler.getSlots(); i++) {
-                int speed = conduit.transferRatePerCycle();
-                if (extract.upgrade() instanceof ExtractionSpeedUpgrade speedUpgrade) {
-                    speed *= (int) Math.pow(2, speedUpgrade.tier());
-                }
+            int speed = conduit.transferRatePerCycle();
+            if (extract.upgrade() instanceof ExtractionSpeedUpgrade speedUpgrade) {
+                speed *= (int) Math.pow(2, speedUpgrade.tier());
+            }
 
+            nextItem: for (int i = 0; i < extractHandler.getSlots(); i++) {
                 ItemStack extractedItem = extractHandler.extractItem(i, speed - extracted, true);
                 if (extractedItem.isEmpty()) {
                     continue;
@@ -46,6 +46,7 @@ public class ItemConduitTicker extends CapabilityAwareConduitTicker<ItemConduit,
                 ItemConduitData.ItemSidedData sidedExtractData = extract.node()
                         .getOrCreateData(ConduitTypes.Data.ITEM.get())
                         .compute(extract.direction());
+
                 if (sidedExtractData.isRoundRobin) {
                     if (inserts.size() <= sidedExtractData.rotatingIndex) {
                         sidedExtractData.rotatingIndex = 0;
