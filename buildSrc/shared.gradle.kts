@@ -83,6 +83,8 @@ dependencies {
     if (project.name != "ensure_plugin") {
         add("compileOnly", project(":ensure_plugin"))
         add("annotationProcessor", project(":ensure_plugin"))
+        add("testCompileOnly", project(":ensure_plugin"))
+        add("testAnnotationProcessor", project(":ensure_plugin"))
 
         if (project.name != "endercore") {
             add("api", project(":endercore"))

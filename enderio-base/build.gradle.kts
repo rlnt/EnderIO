@@ -35,6 +35,13 @@ dependencies {
     // JEI
     compileOnly("mezz.jei:jei-$jeiMinecraftVersion-common-api:$jeiVersion")
     compileOnly("mezz.jei:jei-$jeiMinecraftVersion-neoforge-api:$jeiVersion")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 neoForge {
@@ -67,6 +74,11 @@ neoForge {
         register("enderio_base") {
             sourceSet(sourceSets["main"])
         }
+    }
+
+    unitTest {
+        enable()
+        testedMod = mods["enderio_base"]
     }
 
     neoFormRuntime {
