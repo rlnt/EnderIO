@@ -33,12 +33,13 @@ public class ItemConduitTicker extends CapabilityAwareConduitTicker<ItemConduitD
             IItemHandler extractHandler = extract.capability;
             int extracted = 0;
 
+            int speed = 4;
+            if (extract.upgrade instanceof ExtractionSpeedUpgrade speedUpgrade) {
+                speed *= (int) Math.pow(2, speedUpgrade.tier());
+            }
+
             nextItem:
             for (int i = 0; i < extractHandler.getSlots(); i++) {
-                int speed = 4;
-                if (extract.upgrade instanceof ExtractionSpeedUpgrade speedUpgrade) {
-                    speed *= (int) Math.pow(2, speedUpgrade.tier());
-                }
 
                 ItemStack extractedItem = extractHandler.extractItem(i, speed - extracted, true);
                 if (extractedItem.isEmpty()) {
