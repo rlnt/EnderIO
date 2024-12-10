@@ -82,7 +82,7 @@ public class ItemConduitTicker extends CapabilityAwareConduitTicker<ItemConduitD
                     if (successfullyInserted > 0) {
                         extracted += successfullyInserted;
                         extractHandler.extractItem(i, successfullyInserted, false);
-                        if (extracted >= speed) {
+                        if (extracted >= speed || isEmpty(extractHandler)) {
                             if (sidedExtractData.isRoundRobin) {
                                 sidedExtractData.rotatingIndex = insertIndex + 1;
                             }
@@ -94,6 +94,16 @@ public class ItemConduitTicker extends CapabilityAwareConduitTicker<ItemConduitD
                 }
             }
         }
+    }
+
+    private boolean isEmpty(IItemHandler itemHandler) {
+        for (var i = 0; i < itemHandler.getSlots(); i++) {
+            if (!itemHandler.getStackInSlot(i).isEmpty()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
