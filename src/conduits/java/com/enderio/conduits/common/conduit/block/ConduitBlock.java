@@ -297,9 +297,6 @@ public class ConduitBlock extends Block implements EntityBlock, SimpleWaterlogge
             if (type != null) {
                 conduit.removeTypeAndDelete(event.getEntity(), type);
                 if (event.getLevel() instanceof ServerLevel serverLevel) {
-                    Inventory inventory = event.getEntity().getInventory();
-                    inventory.placeItemBackInInventory(new ItemStack(type.getConduitItem()));
-
                     ServerPlayer player = (ServerPlayer) event.getEntity();
                     event.getLevel().playSound(null, event.getPos(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2f,
                         ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
