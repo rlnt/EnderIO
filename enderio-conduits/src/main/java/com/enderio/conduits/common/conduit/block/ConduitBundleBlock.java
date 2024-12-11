@@ -302,9 +302,6 @@ public class ConduitBundleBlock extends Block implements EntityBlock, SimpleWate
             if (conduit != null) {
                 blockEntity.removeTypeAndDelete(event.getEntity(), conduit);
                 if (event.getLevel() instanceof ServerLevel serverLevel) {
-                    Inventory inventory = event.getEntity().getInventory();
-                    inventory.placeItemBackInInventory(ConduitBlockItem.getStackFor(conduit, 1));
-
                     ServerPlayer player = (ServerPlayer) event.getEntity();
                     event.getLevel().playSound(null, event.getPos(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2f,
                         ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
