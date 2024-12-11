@@ -158,10 +158,10 @@ public class SoulBindingCategory extends MachineRecipeCategory<RecipeHolder<Soul
         }
 
         builder.addSlot(OUTPUT, 77, 4)
-            .addItemStacks(results);
+            .addItemStack(new ItemStack(EIOItems.EMPTY_SOUL_VIAL.get()));
 
         builder.addSlot(OUTPUT, 99, 4)
-            .addItemStack(new ItemStack(EIOItems.EMPTY_SOUL_VIAL.get()));
+            .addItemStacks(results);
     }
 
     @Override
