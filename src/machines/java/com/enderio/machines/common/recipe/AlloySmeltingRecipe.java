@@ -79,9 +79,32 @@ public class AlloySmeltingRecipe implements MachineRecipe<AlloySmeltingRecipe.Co
 
     @Override
     public boolean matches(ContainerWrapper container, Level level) {
+        if (inputs.isEmpty()) {
+            return false;
+        }
+
+        // Simpler smelting match logic
+        if (isSmelting) {
+            int emptyCount = 0;
+
+            for (int i = 0; i < 3; i++) {
+                var slotItem = container.getItem(i);
+
+                if (slotItem.isEmpty()) {
+                    emptyCount++;
+                    continue;
+                }
+
+                if (!inputs.get(0).test(slotItem)) {
+                    return false;
+                }
+            }
+
+            return emptyCount < 3;
+        }
+
         // Trace which input items are matched, and which slots have been used for matching.
         boolean[] matchedInputs = new boolean[3];
-
         var slotAccess = container.getSlotAccess();
 
         // Iterate over the slots
