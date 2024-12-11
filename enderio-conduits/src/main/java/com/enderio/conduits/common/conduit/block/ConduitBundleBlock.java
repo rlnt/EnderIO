@@ -301,12 +301,6 @@ public class ConduitBundleBlock extends Block implements EntityBlock, SimpleWate
             Holder<Conduit<?>> conduit = blockEntity.getShape().getConduit(event.getPos(), event.getHitVec());
             if (conduit != null) {
                 blockEntity.removeTypeAndDelete(event.getEntity(), conduit);
-                if (event.getLevel() instanceof ServerLevel serverLevel) {
-                    ServerPlayer player = (ServerPlayer) event.getEntity();
-                    event.getLevel().playSound(null, event.getPos(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2f,
-                        ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
-                }
-
                 event.setCanceled(true);
             }
         }
