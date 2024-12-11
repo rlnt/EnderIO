@@ -6,6 +6,8 @@ import com.enderio.base.api.travel.TravelTargetApi;
 import com.enderio.base.common.config.BaseConfig;
 import com.enderio.base.common.init.EIOItems;
 import com.enderio.base.common.network.RequestTravelPacket;
+import java.util.Comparator;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,9 +30,6 @@ import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Comparator;
-import java.util.Optional;
-
 /**
  * Thanks to the developers of <a href="https://github.com/castcrafter/travel_anchors">https://github.com/castcrafter/travel_anchors</a> for allowing us to use their code with our license.
  * For their agreements look at doc/license/castcrafter/travel-anchors/license.md in the repo root
@@ -39,6 +38,7 @@ import java.util.Optional;
 public class TravelHandler {
 
     public static final int MIN_TELEPORTATION_DISTANCE_SQUARED = 25;
+
     public static boolean canTeleport(Player player) {
         return canItemTeleport(player) || canBlockTeleport(player);
     }
@@ -53,9 +53,9 @@ public class TravelHandler {
             return true;
         }
 
-        //if (stack.getItem() instanceof IDarkSteelItem darkSteelItem) {
-            //TODO: Check for upgrade;
-        //}
+        // if (stack.getItem() instanceof IDarkSteelItem darkSteelItem) {
+        // TODO: Check for upgrade;
+        // }
         return false;
     }
 
@@ -94,14 +94,16 @@ public class TravelHandler {
     }
 
     public static boolean blockTeleport(Level level, Player player, boolean sendToServer) {
-        return getAnchorTarget(player)
-            .filter(iTravelTarget -> blockTeleportTo(level, player, iTravelTarget, sendToServer)).isPresent();
+        return getTeleportAnchorTarget(player)
+                .filter(iTravelTarget -> blockTeleportTo(level, player, iTravelTarget, sendToServer))
+                .isPresent();
     }
 
     public static boolean blockElevatorTeleport(Level level, Player player, Direction direction, boolean sendToServer) {
         if (direction.getStepY() != 0) {
             return getElevatorAnchorTarget(player, direction)
-                .filter(iTravelTarget -> blockTeleportTo(level, player, iTravelTarget, sendToServer)).isPresent();
+                    .filter(iTravelTarget -> blockTeleportTo(level, player, iTravelTarget, sendToServer))
+                    .isPresent();
         }
         return false;
     }
@@ -112,7 +114,8 @@ public class TravelHandler {
             return false;
         }
         BlockPos blockPos = target.pos();
-        Vec3 teleportPosition = new Vec3(blockPos.getX() + 0.5f, blockPos.getY() + height.get() + 1, blockPos.getZ() + 0.5f);
+        Vec3 teleportPosition = new Vec3(blockPos.getX() + 0.5f, blockPos.getY() + height.get() + 1,
+                blockPos.getZ() + 0.5f);
         teleportPosition = teleportEvent(player, teleportPosition).orElse(null);
         if (teleportPosition != null) {
             if (player instanceof ServerPlayer serverPlayer) {
@@ -131,7 +134,8 @@ public class TravelHandler {
     }
 
     public static Optional<Vec3> teleportPosition(Level level, Player player) {
-        @Nullable BlockPos target = null;
+        @Nullable
+        BlockPos target = null;
         double floorHeight = 0;
 
         // inspired by Entity#pick
@@ -140,7 +144,8 @@ public class TravelHandler {
         int range = BaseConfig.COMMON.ITEMS.TRAVELLING_BLINK_RANGE.get();
         Vec3 toPos = playerPos.add(lookVec.scale(range));
 
-        ClipContext clipCtx = new ClipContext(playerPos, toPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, CollisionContext.empty());
+        ClipContext clipCtx = new ClipContext(playerPos, toPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE,
+                CollisionContext.empty());
         BlockHitResult bhr = level.clip(clipCtx);
 
         // process the result
@@ -149,7 +154,8 @@ public class TravelHandler {
         } else if (bhr.getType() == HitResult.Type.BLOCK) {
             Direction dir = bhr.getDirection();
             if (dir == Direction.UP) {
-                // teleport the player *inside* the target block, then later push them up by the block's height
+                // teleport the player *inside* the target block, then later push them up by the
+                // block's height
                 // warning: relies on the fact that isTeleportClear works with heights >= 1
                 target = bhr.getBlockPos();
             } else if (dir == Direction.DOWN) {
@@ -168,23 +174,27 @@ public class TravelHandler {
             // add small amount to make sure it starts at the correct block
             Vec3 traverseFrom = bhr.getLocation().add(lookVec.scale(0.01));
 
-            // since we can't return null from the fail condition, instead use an invalid position
+            // since we can't return null from the fail condition, instead use an invalid
+            // position
             BlockPos failPosition = new BlockPos(0, Integer.MAX_VALUE, 0);
 
             boolean aimingUp = lookVec.y > 0.5;
 
-            // can reuse same toPos and clipCtx because this traversal should be along the same line
-            BlockPos newTarget = BlockGetter.traverseBlocks(traverseFrom, toPos, clipCtx, (traverseCtx, traversePos) -> {
-                if (!aimingUp) {
-                    // check underneath first, since that's more likely to be where the player wants to teleport
-                    BlockPos checkBelow = traversalCheck(level, traversePos.below());
-                    if (checkBelow != null) {
-                        return checkBelow;
-                    }
-                }
+            // can reuse same toPos and clipCtx because this traversal should be along the
+            // same line
+            BlockPos newTarget = BlockGetter.traverseBlocks(traverseFrom, toPos, clipCtx,
+                    (traverseCtx, traversePos) -> {
+                        if (!aimingUp) {
+                            // check underneath first, since that's more likely to be where the player wants
+                            // to teleport
+                            BlockPos checkBelow = traversalCheck(level, traversePos.below());
+                            if (checkBelow != null) {
+                                return checkBelow;
+                            }
+                        }
 
-                return traversalCheck(level, traversePos);
-            }, (failCtx) -> failPosition);
+                        return traversalCheck(level, traversePos);
+                    }, (failCtx) -> failPosition);
             if (newTarget != failPosition) {
                 target = newTarget.immutable();
             }
@@ -192,7 +202,7 @@ public class TravelHandler {
 
         if (target != null) {
             Optional<Double> ground = isTeleportPositionClear(level, target.below());
-            if (ground.isPresent()) { //to use the same check as the anchors use the position below
+            if (ground.isPresent()) { // to use the same check as the anchors use the position below
                 floorHeight = ground.get();
             } else {
                 target = null;
@@ -215,22 +225,22 @@ public class TravelHandler {
         return null;
     }
 
-    public static Optional<TravelTarget> getAnchorTarget(Player player) {
+    public static Optional<TravelTarget> getTeleportAnchorTarget(Player player) {
         Vec3 positionVec = player.position().add(0, player.getEyeHeight(), 0);
 
-        return TravelTargetApi.INSTANCE
-            .getInItemRange(player.level(), player.blockPosition())
-            .filter(target -> target.canTravelTo())
-            .filter(target -> target.pos().distToCenterSqr(player.position()) > MIN_TELEPORTATION_DISTANCE_SQUARED)
-            .filter(target -> Math.abs(getAngleRadians(positionVec, target.pos(), player.getYRot(), player.getXRot())) <= Math.toRadians(15))
-            .filter(target -> isTeleportPositionClear(player.level(), target.pos()).isPresent())
-            .min(Comparator.comparingDouble(target -> Math.abs(getAngleRadians(positionVec, target.pos(), player.getYRot(), player.getXRot()))));
+        return TravelTargetApi.INSTANCE.getInItemRange(player.level(), player.blockPosition())
+                .filter(target -> target.canTeleportTo())
+                .filter(target -> target.pos().distToCenterSqr(player.position()) > MIN_TELEPORTATION_DISTANCE_SQUARED)
+                .filter(target -> Math.abs(getAngleRadians(positionVec, target.pos(), player.getYRot(),
+                        player.getXRot())) <= Math.toRadians(15))
+                .filter(target -> isTeleportPositionClear(player.level(), target.pos()).isPresent())
+                .min(Comparator.comparingDouble(target -> Math
+                        .abs(getAngleRadians(positionVec, target.pos(), player.getYRot(), player.getXRot()))));
     }
 
     public static Optional<TravelTarget> getElevatorAnchorTarget(Player player, Direction direction) {
         int anchorRange = BaseConfig.COMMON.ITEMS.TRAVELLING_BLOCK_TO_BLOCK_RANGE.get();
         BlockPos anchorPos = player.blockPosition().below();
-
 
         int anchorX = anchorPos.getX();
         int anchorY = anchorPos.getY();
@@ -246,19 +256,18 @@ public class TravelHandler {
             lowerY = anchorY - anchorRange - 1;
         }
 
-        return TravelTargetApi.INSTANCE
-            .getAll(player.level())
-            .stream()
-            .filter(target -> target.pos().getX() == anchorX && target.pos().getZ() == anchorZ)
-            .filter(target -> target.pos().getY() > lowerY && target.pos().getY() < upperY)
-            .filter(target -> target.canTravelTo())
-            .filter(target -> isTeleportPositionClear(player.level(), target.pos()).isPresent())
-            .min(Comparator.comparingDouble(target -> Math.abs(target.pos().getY() - anchorY)));
+        return TravelTargetApi.INSTANCE.getAll(player.level())
+                .stream()
+                .filter(target -> target.pos().getX() == anchorX && target.pos().getZ() == anchorZ)
+                .filter(target -> target.pos().getY() > lowerY && target.pos().getY() < upperY)
+                .filter(target -> target.canJumpTo())
+                .filter(target -> isTeleportPositionClear(player.level(), target.pos()).isPresent())
+                .min(Comparator.comparingDouble(target -> Math.abs(target.pos().getY() - anchorY)));
     }
 
-
     private static double getAngleRadians(Vec3 positionVec, BlockPos anchor, float yRot, float xRot) {
-        Vec3 blockVec = new Vec3(anchor.getX() + 0.5 - positionVec.x, anchor.getY() + 1.0 - positionVec.y, anchor.getZ() + 0.5 - positionVec.z).normalize();
+        Vec3 blockVec = new Vec3(anchor.getX() + 0.5 - positionVec.x, anchor.getY() + 1.0 - positionVec.y,
+                anchor.getZ() + 0.5 - positionVec.z).normalize();
         Vec3 lookVec = Vec3.directionFromRotation(xRot, yRot).normalize();
         return Math.acos(lookVec.dot(blockVec));
     }

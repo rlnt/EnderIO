@@ -17,15 +17,10 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
 
-public record AnchorTravelTarget(
-    BlockPos pos,
-    String name,
-    Item icon,
-    boolean isVisible
-) implements TravelTarget {
+public record AnchorTravelTarget(BlockPos pos, String name, Item icon, boolean isVisible) implements TravelTarget {
 
-    public static NetworkDataSlot.CodecType<AnchorTravelTarget> DATA_SLOT_TYPE =
-        new NetworkDataSlot.CodecType<>(Serializer.CODEC.codec(), Serializer.STREAM_CODEC);
+    public static NetworkDataSlot.CodecType<AnchorTravelTarget> DATA_SLOT_TYPE = new NetworkDataSlot.CodecType<>(
+            Serializer.CODEC.codec(), Serializer.STREAM_CODEC);
 
     public AnchorTravelTarget withName(String name) {
         return new AnchorTravelTarget(pos, name, icon, isVisible);
@@ -42,6 +37,17 @@ public record AnchorTravelTarget(
     @Override
     public boolean canTravelTo() {
         return isVisible;
+    }
+
+    @Override
+    public boolean canTeleportTo() {
+        return isVisible();
+    }
+
+    @Override
+    public boolean canJumpTo() {
+        // TODO: Protected & Private Anchors
+        return true;
     }
 
     @Override
@@ -66,26 +72,17 @@ public record AnchorTravelTarget(
 
     public static class Serializer implements TravelTargetSerializer<AnchorTravelTarget> {
 
-        public static MapCodec<AnchorTravelTarget> CODEC = RecordCodecBuilder.mapCodec(
-            instance -> instance.group(
-                BlockPos.CODEC.fieldOf("pos").forGetter(AnchorTravelTarget::pos),
-                Codec.STRING.fieldOf("name").forGetter(AnchorTravelTarget::name),
-                BuiltInRegistries.ITEM.byNameCodec().fieldOf("icon").forGetter(AnchorTravelTarget::icon),
-                Codec.BOOL.fieldOf("is_visible").forGetter(AnchorTravelTarget::isVisible)
-            ).apply(instance, AnchorTravelTarget::new)
-        );
+        public static MapCodec<AnchorTravelTarget> CODEC = RecordCodecBuilder.mapCodec(instance -> instance
+                .group(BlockPos.CODEC.fieldOf("pos").forGetter(AnchorTravelTarget::pos),
+                        Codec.STRING.fieldOf("name").forGetter(AnchorTravelTarget::name),
+                        BuiltInRegistries.ITEM.byNameCodec().fieldOf("icon").forGetter(AnchorTravelTarget::icon),
+                        Codec.BOOL.fieldOf("is_visible").forGetter(AnchorTravelTarget::isVisible))
+                .apply(instance, AnchorTravelTarget::new));
 
         public static StreamCodec<RegistryFriendlyByteBuf, AnchorTravelTarget> STREAM_CODEC = StreamCodec.composite(
-            BlockPos.STREAM_CODEC,
-            AnchorTravelTarget::pos,
-            ByteBufCodecs.STRING_UTF8,
-            AnchorTravelTarget::name,
-            ByteBufCodecs.registry(Registries.ITEM),
-            AnchorTravelTarget::icon,
-            ByteBufCodecs.BOOL,
-            AnchorTravelTarget::isVisible,
-            AnchorTravelTarget::new
-        );
+                BlockPos.STREAM_CODEC, AnchorTravelTarget::pos, ByteBufCodecs.STRING_UTF8, AnchorTravelTarget::name,
+                ByteBufCodecs.registry(Registries.ITEM), AnchorTravelTarget::icon, ByteBufCodecs.BOOL,
+                AnchorTravelTarget::isVisible, AnchorTravelTarget::new);
 
         @Override
         public MapCodec<AnchorTravelTarget> codec() {

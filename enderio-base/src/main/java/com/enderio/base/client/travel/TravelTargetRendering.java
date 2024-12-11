@@ -8,6 +8,8 @@ import com.enderio.base.api.travel.TravelTargetApi;
 import com.enderio.base.api.travel.TravelTargetType;
 import com.enderio.base.common.handler.TravelHandler;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -20,9 +22,6 @@ import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @EventBusSubscriber(modid = EnderIOBase.MODULE_MOD_ID, value = Dist.CLIENT)
 public class TravelTargetRendering {
@@ -39,14 +38,15 @@ public class TravelTargetRendering {
     }
 
     public static <T extends TravelTarget> TravelRenderer<T> getRenderer(TravelTargetType<T> type) {
-        //noinspection unchecked
+        // noinspection unchecked
         return (TravelRenderer<T>) RENDERERS.get(type);
     }
 
-    private static <T extends TravelTarget> void render(T target, LevelRenderer levelRender, PoseStack poseStack, double distanceSquared, boolean isActive,
-        float partialTick) {
-        //noinspection unchecked
-        getRenderer((TravelTargetType<T>)target.type()).render(target, levelRender, poseStack, distanceSquared, isActive, partialTick);
+    private static <T extends TravelTarget> void render(T target, LevelRenderer levelRender, PoseStack poseStack,
+            double distanceSquared, boolean isActive, float partialTick) {
+        // noinspection unchecked
+        getRenderer((TravelTargetType<T>) target.type()).render(target, levelRender, poseStack, distanceSquared,
+                isActive, partialTick);
     }
 
     @SubscribeEvent
@@ -64,13 +64,12 @@ public class TravelTargetRendering {
         boolean itemTeleport = TravelHandler.canItemTeleport(player);
 
         @Nullable
-        TravelTarget activeTarget = TravelHandler.getAnchorTarget(player).orElse(null);
+        TravelTarget activeTarget = TravelHandler.getTeleportAnchorTarget(player).orElse(null);
         for (TravelTarget target : TravelTargetApi.INSTANCE.getAll(level)) {
             double range = itemTeleport ? target.item2BlockRange() : target.block2BlockRange();
             double distanceSquared = target.pos().distToCenterSqr(player.position());
-            if (range * range < distanceSquared
-                || distanceSquared < TravelHandler.MIN_TELEPORTATION_DISTANCE_SQUARED
-                || TravelHandler.isTeleportPositionClear(level, target.pos()).isEmpty()) {
+            if (range * range < distanceSquared || distanceSquared < TravelHandler.MIN_TELEPORTATION_DISTANCE_SQUARED
+                    || TravelHandler.isTeleportPositionClear(level, target.pos()).isEmpty()) {
                 continue;
             }
 
@@ -83,7 +82,8 @@ public class TravelTargetRendering {
             boolean active = activeTarget == target;
 
             // needed for smooth rendering
-            // the boolean value controls whether it's still smooth while the game world is paused (e.g. /tick freeze)
+            // the boolean value controls whether it's still smooth while the game world is
+            // paused (e.g. /tick freeze)
             float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(true);
 
             render(target, event.getLevelRenderer(), poseStack, distanceSquared, active, partialTick);
