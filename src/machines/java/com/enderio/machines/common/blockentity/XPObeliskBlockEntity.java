@@ -10,7 +10,9 @@ import com.enderio.machines.common.io.fluid.MachineFluidTank;
 import com.enderio.machines.common.io.fluid.MachineTankLayout;
 import com.enderio.machines.common.io.fluid.TankAccess;
 import com.enderio.machines.common.menu.XPObeliskMenu;
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -20,11 +22,14 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class XPObeliskBlockEntity extends MachineBlockEntity {
 
     IntegerNetworkDataSlot xpTankDataSlot;
     private static final TankAccess TANK = new TankAccess();
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     public XPObeliskBlockEntity(BlockEntityType<?> type, BlockPos worldPosition, BlockState blockState) {
         super(type, worldPosition, blockState);
@@ -118,7 +123,19 @@ public class XPObeliskBlockEntity extends MachineBlockEntity {
         // If we add it all at once, the experienceProgress gets messed up and then the next extract is wonky.
         int xpToAdd = drained.getAmount() / ExperienceUtil.EXP_TO_FLUID;
         while (xpToAdd > 0) {
-            int xp = Math.min(xpToAdd, (int)Math.floor((1 - player.experienceProgress) * ExperienceUtil.getXpNeededForNextLevel(player.experienceLevel)));
+            int xp = Mth.clamp((int)Math.floor((1 - player.experienceProgress) * ExperienceUtil.getXpNeededForNextLevel(player.experienceLevel)), 0, xpToAdd);
+
+            // If we can't add the rest of this level's progress, move on.
+            if (xp <= 0) {
+                xp = Mth.clamp(ExperienceUtil.getXpNeededForNextLevel(player.experienceLevel + 1), 0, xpToAdd);
+            }
+
+            if (xp <= 0) {
+                LOGGER.error("xp <= 0 in addPlayerXp. experienceLevel: {}, experienceProgress: {}, xpToAdd: {}, xp: {}",
+                    player.experienceLevel, player.experienceProgress, xpToAdd, xp);
+                throw new IllegalStateException("xp <= 0 in addPlayerXp.");
+            }
+
             player.giveExperiencePoints(xp);
             xpToAdd -= xp;
         }
@@ -144,13 +161,17 @@ public class XPObeliskBlockEntity extends MachineBlockEntity {
         // If we add it all at once, the experienceProgress gets messed up and then the next extract is wonky.
         int xpToRemove = filled / ExperienceUtil.EXP_TO_FLUID;
         while (xpToRemove > 0) {
-            int xp;
+            int xp = Mth.clamp((int)Math.floor(player.experienceProgress * ExperienceUtil.getXpNeededForNextLevel(player.experienceLevel)), 0, xpToRemove);
 
-            // Remove current level progress, then strip back level-by-level.
-            if (player.experienceProgress > 0) {
-                xp = Math.min(xpToRemove, (int)Math.floor(player.experienceProgress * ExperienceUtil.getXpNeededForNextLevel(player.experienceLevel)));
-            } else {
-                xp = Math.min(xpToRemove, ExperienceUtil.getXpNeededForNextLevel(player.experienceLevel - 1));
+            // If we can't remove the rest of this level's progress, move on.
+            if (xp <= 0) {
+                xp = Mth.clamp(ExperienceUtil.getXpNeededForNextLevel(player.experienceLevel - 1), 0, xpToRemove);
+            }
+
+            if (xp <= 0) {
+                LOGGER.error("xp <= 0 in removePlayerXp. experienceLevel: {}, experienceProgress: {}, xpToRemove: {}, xp: {}",
+                    player.experienceLevel, player.experienceProgress, xpToRemove, xp);
+                throw new IllegalStateException("xp <= 0 in removePlayerXp.");
             }
 
             player.giveExperiencePoints(-xp);
