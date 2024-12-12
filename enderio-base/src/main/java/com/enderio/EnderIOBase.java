@@ -39,6 +39,11 @@ import com.enderio.base.data.tags.EIOEntityTagsProvider;
 import com.enderio.base.data.tags.EIOFluidTagsProvider;
 import com.enderio.base.data.tags.EIOItemTagsProvider;
 import com.enderio.regilite.Regilite;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -59,22 +64,12 @@ import net.neoforged.neoforge.common.data.AdvancementProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @EventBusSubscriber(modid = EnderIOBase.MODULE_MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 @Mod(EnderIOBase.MODULE_MOD_ID)
 public class EnderIOBase {
     public static final String MODULE_MOD_ID = "enderio_base";
     public static final String REGISTRY_NAMESPACE = "enderio";
-
-    public static final Logger LOGGER = LogManager.getLogger(REGISTRY_NAMESPACE);
 
     public static Regilite REGILITE = new Regilite(REGISTRY_NAMESPACE);
 
@@ -101,14 +96,15 @@ public class EnderIOBase {
         modContainer.registerConfig(ModConfig.Type.CLIENT, BaseConfig.CLIENT_SPEC, "enderio/base-client.toml");
         BaseConfigLang.register();
 
-        // Perform initialization and registration for everything so things are registered.
+        // Perform initialization and registration for everything so things are
+        // registered.
         EIODataComponents.register(modEventBus);
         EIOCreativeTabs.register(modEventBus);
         EIOItems.register(modEventBus);
         EIOBlocks.register(modEventBus);
         EIOBlockEntities.register(modEventBus);
         EIOFluids.register(modEventBus);
-        //EIOEnchantments.register(modEventBus);
+        // EIOEnchantments.register(modEventBus);
         EIOTags.register();
         EIOMenus.register(modEventBus);
         EIOLang.register();
@@ -151,14 +147,20 @@ public class EnderIOBase {
 
         var b = new EIOBlockTagsProvider(packOutput, lookupProvider, existingFileHelper);
         provider.addSubProvider(event.includeServer(), b);
-        provider.addSubProvider(event.includeServer(), new EIOItemTagsProvider(packOutput, lookupProvider, b.contentsGetter(), existingFileHelper));
-        provider.addSubProvider(event.includeServer(), new EIOFluidTagsProvider(packOutput, lookupProvider, existingFileHelper));
-        provider.addSubProvider(event.includeServer(), new EIOEntityTagsProvider(packOutput, lookupProvider, existingFileHelper));
         provider.addSubProvider(event.includeServer(),
-            new AdvancementProvider(packOutput, lookupProvider, existingFileHelper, List.of(new EIOAdvancementGenerator())));
-        provider.addSubProvider(event.includeServer(), new LootTableProvider(packOutput, Collections.emptySet(),
-            List.of(new LootTableProvider.SubProviderEntry(FireCraftingLootProvider::new, LootContextParamSets.EMPTY),
-                new LootTableProvider.SubProviderEntry(ChestLootProvider::new, LootContextParamSets.CHEST)), lookupProvider));
+                new EIOItemTagsProvider(packOutput, lookupProvider, b.contentsGetter(), existingFileHelper));
+        provider.addSubProvider(event.includeServer(),
+                new EIOFluidTagsProvider(packOutput, lookupProvider, existingFileHelper));
+        provider.addSubProvider(event.includeServer(),
+                new EIOEntityTagsProvider(packOutput, lookupProvider, existingFileHelper));
+        provider.addSubProvider(event.includeServer(), new AdvancementProvider(packOutput, lookupProvider,
+                existingFileHelper, List.of(new EIOAdvancementGenerator())));
+        provider.addSubProvider(event.includeServer(),
+                new LootTableProvider(packOutput, Collections.emptySet(), List.of(
+                        new LootTableProvider.SubProviderEntry(FireCraftingLootProvider::new,
+                                LootContextParamSets.EMPTY),
+                        new LootTableProvider.SubProviderEntry(ChestLootProvider::new, LootContextParamSets.CHEST)),
+                        lookupProvider));
         generator.addProvider(true, provider);
     }
 

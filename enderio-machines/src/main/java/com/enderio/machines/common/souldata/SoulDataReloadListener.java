@@ -20,11 +20,16 @@ SOFTWARE.
 
 package com.enderio.machines.common.souldata;
 
-import com.enderio.EnderIOBase;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,12 +39,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import org.slf4j.Logger;
 
 /**
  * Codec-based data manager for loading data.
@@ -50,10 +50,11 @@ import java.util.function.Function;
  */
 public class SoulDataReloadListener<T extends SoulData> extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = new Gson();
-    public Map<ResourceLocation,T> map = new HashMap<>();
+    public Map<ResourceLocation, T> map = new HashMap<>();
     private final Codec<T> codec;
     private final String folderName;
     private static final Map<String, SoulDataReloadListener<? extends SoulData>> LOADED_SOUL_DATA = new HashMap<>();
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     /**
      * Creates a data manager with a custom gson parser
@@ -64,7 +65,7 @@ public class SoulDataReloadListener<T extends SoulData> extends SimpleJsonResour
      * @param gson A gson for parsing the raw json data into JsonElements. JsonElement-to-T conversion will be done by the codec,
      * so gson type adapters shouldn't be necessary here
      */
-    public SoulDataReloadListener(Gson gson, String folder, Codec<T> codec){
+    public SoulDataReloadListener(Gson gson, String folder, Codec<T> codec) {
         super(gson, "eio_soul/" + folder);
         this.codec = codec;
         this.folderName = "eio_soul/" + folder;
@@ -83,17 +84,23 @@ public class SoulDataReloadListener<T extends SoulData> extends SimpleJsonResour
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
+    protected void apply(Map<ResourceLocation, JsonElement> pObject, ResourceManager pResourceManager,
+            ProfilerFiller pProfiler) {
         Map<ResourceLocation, T> newMap = new HashMap<>();
 
-        for (Map.Entry<ResourceLocation, JsonElement> element: pObject.entrySet()) {
+        for (Map.Entry<ResourceLocation, JsonElement> element : pObject.entrySet()) {
             codec.decode(JsonOps.INSTANCE, element.getValue())
-                .ifSuccess(result -> newMap.put(result.getFirst().getKey(), result.getFirst())) //store the key from the ISoulData interface. Makes the look faster.
-                .ifError(partial -> EnderIOBase.LOGGER.error("Failed to parse data json for {} due to: {}", element.getKey(), partial.message()));
+                    .ifSuccess(result -> newMap.put(result.getFirst().getKey(), result.getFirst())) // store the key
+                                                                                                    // from the
+                                                                                                    // ISoulData
+                                                                                                    // interface. Makes
+                                                                                                    // the look faster.
+                    .ifError(partial -> LOGGER.error("Failed to parse data json for {} due to: {}", element.getKey(),
+                            partial.message()));
         }
 
         this.map = newMap;
-        EnderIOBase.LOGGER.info("Data loader for {} loaded {} jsons", this.folderName, this.map.size());
+        LOGGER.info("Data loader for {} loaded {} jsons", this.folderName, this.map.size());
     }
 
     /**
@@ -103,13 +110,15 @@ public class SoulDataReloadListener<T extends SoulData> extends SimpleJsonResour
      * @param packetFactory  A packet constructor or factory method that converts the given map to a packet object to send on the given channel
      * @return this manager object
      */
-    public <P extends CustomPacketPayload> SoulDataReloadListener<T> subscribeAsSyncable(final Function<Map<ResourceLocation, T>, P> packetFactory) {
+    public <P extends CustomPacketPayload> SoulDataReloadListener<T> subscribeAsSyncable(
+            final Function<Map<ResourceLocation, T>, P> packetFactory) {
         NeoForge.EVENT_BUS.addListener(this.getDatapackSyncListener(packetFactory));
         return this;
     }
 
     /** Generate an event listener function for the on-datapack-sync event **/
-    private <P extends CustomPacketPayload> Consumer<OnDatapackSyncEvent> getDatapackSyncListener(final Function<Map<ResourceLocation, T>, P> packetFactory) {
+    private <P extends CustomPacketPayload> Consumer<OnDatapackSyncEvent> getDatapackSyncListener(
+            final Function<Map<ResourceLocation, T>, P> packetFactory) {
         return event -> {
             ServerPlayer player = event.getPlayer();
             P packet = packetFactory.apply(this.map);

@@ -1,9 +1,12 @@
 package com.enderio.machines.common.integrations.jei.transfer;
 
-import com.enderio.EnderIOBase;
 import com.enderio.machines.common.init.MachineMenus;
 import com.enderio.machines.common.menu.CrafterMenu;
 import com.enderio.machines.common.network.UpdateCrafterTemplatePacket;
+import com.mojang.logging.LogUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.RecipeType;
@@ -20,12 +23,12 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import org.slf4j.Logger;
 
 public class CrafterRecipeTransferHandler implements IRecipeTransferHandler<CrafterMenu, RecipeHolder<CraftingRecipe>> {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     private final IRecipeTransferHandlerHelper handlerHelper;
 
     public CrafterRecipeTransferHandler(IRecipeTransferHandlerHelper handlerHelper) {
@@ -48,8 +51,8 @@ public class CrafterRecipeTransferHandler implements IRecipeTransferHandler<Craf
     }
 
     @Override
-    public @Nullable IRecipeTransferError transferRecipe(CrafterMenu container, RecipeHolder<CraftingRecipe> recipe, IRecipeSlotsView recipeSlots, Player player,
-        boolean maxTransfer, boolean doTransfer) {
+    public @Nullable IRecipeTransferError transferRecipe(CrafterMenu container, RecipeHolder<CraftingRecipe> recipe,
+            IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer) {
 
         List<ItemStack> placedStacks = new ArrayList<>();
         var ingredients = recipe.value().getIngredients();
@@ -87,7 +90,8 @@ public class CrafterRecipeTransferHandler implements IRecipeTransferHandler<Craf
                 }
             }
         } else {
-            EnderIOBase.LOGGER.warn("JEI Failure: tried to use a non shaped or shapeless recipe with crafter: " + recipe.getClass().getName());
+            LOGGER.warn("JEI Failure: tried to use a non shaped or shapeless recipe with crafter: "
+                    + recipe.getClass().getName());
             return handlerHelper.createInternalError();
         }
 

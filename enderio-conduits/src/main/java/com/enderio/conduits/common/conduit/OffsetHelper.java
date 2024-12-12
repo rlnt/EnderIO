@@ -1,18 +1,20 @@
 package com.enderio.conduits.common.conduit;
 
-import com.enderio.EnderIOBase;
 import com.enderio.base.common.util.ThrowableUtil;
-import net.minecraft.Util;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
-import org.joml.Vector2i;
-
+import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.Util;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import org.joml.Vector2i;
+import org.slf4j.Logger;
 
 public class OffsetHelper {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     /**
      *
@@ -56,12 +58,14 @@ public class OffsetHelper {
 
     public static Vector2i offsetConduit(int conduitIndex, int maxConduits) {
         if (conduitIndex >= maxConduits) {
-            EnderIOBase.LOGGER.warn(ThrowableUtil.addStackTrace(new IndexOutOfBoundsException("higher index than existing conduits")));
+            LOGGER.warn("Higher index than existing conduits in OffsetHelper#offsetConduit",
+                    ThrowableUtil.addStackTrace(new IndexOutOfBoundsException("higher index than existing conduits")));
             return new Vector2i();
         }
 
         if (conduitIndex < 0) {
-            EnderIOBase.LOGGER.warn(ThrowableUtil.addStackTrace(new IndexOutOfBoundsException("negative index")));
+            LOGGER.warn("Negative index in OffsetHelper#offsetConduit",
+                    ThrowableUtil.addStackTrace(new IndexOutOfBoundsException("negative index")));
             return new Vector2i();
         }
 
@@ -75,16 +79,16 @@ public class OffsetHelper {
 
         if (maxConduits == 3) {
             switch (conduitIndex) {
-                case 0 -> {
-                    return new Vector2i(-1, -1);
-                }
-                case 1 -> {
-                    return new Vector2i();
-                }
-                case 2 -> {
-                    return new Vector2i(1, 1);
-                }
-                default -> throw new IllegalStateException();
+            case 0 -> {
+                return new Vector2i(-1, -1);
+            }
+            case 1 -> {
+                return new Vector2i();
+            }
+            case 2 -> {
+                return new Vector2i(1, 1);
+            }
+            default -> throw new IllegalStateException();
             }
         }
 
@@ -95,15 +99,16 @@ public class OffsetHelper {
             }
         }
 
-        EnderIOBase.LOGGER.warn(ThrowableUtil.addStackTrace(new IndexOutOfBoundsException("fallback was applied")));
+        LOGGER.warn("Fallback was applied in OffsetHelper#offsetConduit",
+                ThrowableUtil.addStackTrace(new IndexOutOfBoundsException("fallback was applied")));
         return new Vector2i();
     }
 
     public static Vec3i translationFor(Direction.Axis axis, Vector2i offset) {
         return switch (axis) {
-            case X -> new Vec3i(0, offset.y(), offset.x());
-            case Y -> new Vec3i(offset.x(), 0, offset.y());
-            case Z -> new Vec3i(offset.x(), offset.y(), 0);
+        case X -> new Vec3i(0, offset.y(), offset.x());
+        case Y -> new Vec3i(offset.x(), 0, offset.y());
+        case Z -> new Vec3i(offset.x(), offset.y(), 0);
         };
     }
 
@@ -119,7 +124,7 @@ public class OffsetHelper {
             return Direction.Axis.Z;
         }
 
-        //get Last as MainAxis, because those are the horizontal ones
-        return connectedDirs.get(connectedDirs.size()-1).getAxis();
+        // get Last as MainAxis, because those are the horizontal ones
+        return connectedDirs.get(connectedDirs.size() - 1).getAxis();
     }
 }

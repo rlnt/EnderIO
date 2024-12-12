@@ -9,6 +9,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -19,28 +24,26 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
+import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiFunction;
-
 @SuppressWarnings("ClassWithOnlyPrivateConstructors")
 @Mixin(value = RecipeManager.class, priority = 1_098)
 public abstract class RecipeManagerMixin extends SimpleJsonResourceReloadListener {
+
+    private static Logger LOGGER;
 
     private RecipeManagerMixin(Gson gson, String directory) {
         super(gson, directory);
     }
 
     @Inject(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At("HEAD"))
-    private void onRecipeReload(Map<ResourceLocation, JsonElement> recipes, ResourceManager resourceManager, ProfilerFiller profiler, CallbackInfo ci) {
+    private void onRecipeReload(Map<ResourceLocation, JsonElement> recipes, ResourceManager resourceManager,
+            ProfilerFiller profiler, CallbackInfo ci) {
         RegistryOps<JsonElement> registryOps = makeConditionalOps();
         Map<ResourceLocation, JsonElement> inheritedRecipes = new HashMap<>();
 
@@ -62,8 +65,8 @@ public abstract class RecipeManagerMixin extends SimpleJsonResourceReloadListene
     }
 
     @Unique
-    private void enderio$handleRecipe(RegistryOps<JsonElement> registryOps, ResourceLocation recipeId, JsonObject recipeJson,
-        BiFunction<ResourceLocation, JsonElement, JsonElement> recipeCallback) {
+    private void enderio$handleRecipe(RegistryOps<JsonElement> registryOps, ResourceLocation recipeId,
+            JsonObject recipeJson, BiFunction<ResourceLocation, JsonElement, JsonElement> recipeCallback) {
         if (!recipeJson.has("type") || !recipeJson.get("type").getAsString().equals("minecraft:smelting")) {
             return;
         }
@@ -76,26 +79,30 @@ public abstract class RecipeManagerMixin extends SimpleJsonResourceReloadListene
                     return;
                 }
 
-                DataResult<JsonElement> result = Recipe.CODEC.encodeStart(JsonOps.INSTANCE, convertedHolder.get().value());
+                DataResult<JsonElement> result = Recipe.CODEC.encodeStart(JsonOps.INSTANCE,
+                        convertedHolder.get().value());
                 recipeCallback.apply(convertedHolder.get().id(), result.getOrThrow());
             }
         } catch (Exception exception) {
-            EnderIOBase.LOGGER.error("Skipping inheritance of smelting recipe {}: {}", recipeId, exception);
+            LOGGER.error("[EnderIO] Skipping inheritance of smelting recipe {}: {}", recipeId, exception);
         }
     }
 
     @Unique
-    private Optional<RecipeHolder<AlloySmeltingRecipe>> enderio$convertSmeltingRecipe(ResourceLocation originalId, SmeltingRecipe smeltingRecipe) {
+    private Optional<RecipeHolder<AlloySmeltingRecipe>> enderio$convertSmeltingRecipe(ResourceLocation originalId,
+            SmeltingRecipe smeltingRecipe) {
         AbstractCookingRecipeAccessor accessor = (AbstractCookingRecipeAccessor) smeltingRecipe;
 
         if (accessor.getResult().isEmpty()) {
-            EnderIOBase.LOGGER.warn("Unable to inherit the cooking recipe with ID: {}. Reason: The result item is empty.", originalId);
+            LOGGER.warn("[EnderIO] Unable to inherit the cooking recipe with ID: {}. Reason: The result item is empty.",
+                    originalId);
             return Optional.empty();
         }
 
         SizedIngredient input = new SizedIngredient(accessor.getIngredient(), 1);
         int energy = MachinesConfig.COMMON.ENERGY.ALLOY_SMELTER_VANILLA_ITEM_ENERGY.get();
-        AlloySmeltingRecipe recipe = new AlloySmeltingRecipe(List.of(input), accessor.getResult(), energy, accessor.getExperience(), true);
+        AlloySmeltingRecipe recipe = new AlloySmeltingRecipe(List.of(input), accessor.getResult(), energy,
+                accessor.getExperience(), true);
 
         String path = "smelting/" + originalId.getNamespace() + "/" + originalId.getPath();
         ResourceLocation id = EnderIOBase.loc(path);
