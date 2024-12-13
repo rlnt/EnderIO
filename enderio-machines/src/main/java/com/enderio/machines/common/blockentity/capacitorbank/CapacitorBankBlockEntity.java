@@ -7,16 +7,17 @@ import com.enderio.core.common.network.NetworkDataSlot;
 import com.enderio.machines.common.blockentity.base.MultiConfigurable;
 import com.enderio.machines.common.blockentity.base.PoweredMachineBlockEntity;
 import com.enderio.machines.common.blockentity.multienergy.CapacityTier;
-import com.enderio.machines.common.blockentity.multienergy.MultiEnergyNode;
-import com.enderio.machines.common.blockentity.multienergy.MultiEnergyStorageWrapper;
 import com.enderio.machines.common.blockentity.sync.LargeEnergyData;
+import com.enderio.machines.common.energy.multi.MultiEnergyGraphContext;
+import com.enderio.machines.common.energy.multi.MultiEnergyNetworkCapability;
+import com.enderio.machines.common.energy.multi.MultiEnergyNetworkManager;
+import com.enderio.machines.common.energy.multi.MultiEnergyNode;
 import com.enderio.machines.common.init.MachineBlockEntities;
 import com.enderio.machines.common.io.energy.ILargeMachineEnergyStorage;
 import com.enderio.machines.common.io.energy.MachineEnergyStorage;
 import com.enderio.machines.common.menu.CapacitorBankMenu;
 import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
-import dev.gigaherz.graph3.Mergeable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,16 +37,16 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implements MultiConfigurable {
+public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implements MultiConfigurable, MultiEnergyNode {
 
     public final CapacityTier tier;
-
-    private final MultiEnergyNode node;
 
     private long addedEnergy = 0;
     private long removedEnergy = 0;
     public static final int AVERAGE_IO_OVER_X_TICKS = 10;
     private final List<BlockPos> clientConfigurables = new ArrayList<>();
+
+    private @Nullable Graph<MultiEnergyGraphContext> graph;
 
     private static final String DISPLAY_MODES = "displaymodes";
 
@@ -67,7 +68,6 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
     public CapacitorBankBlockEntity(BlockPos worldPosition, BlockState blockState, CapacitorTier tier) {
         super(EnergyIOMode.Both, new FixedScalable(tier::getStorageCapacity), new FixedScalable(tier::getStorageCapacity), MachineBlockEntities.CAPACITOR_BANKS.get(tier).get(), worldPosition, blockState);
         this.tier = tier;
-        this.node = new MultiEnergyNode(() -> energyStorage, () -> (MultiEnergyStorageWrapper) getExposedEnergyStorage(), worldPosition);
 
         addDataSlot(NetworkDataSlot.LONG.create(() -> addedEnergy, data -> addedEnergy = data));
         addDataSlot(NetworkDataSlot.LONG.create(() -> removedEnergy, data -> removedEnergy = data));
@@ -88,69 +88,70 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
         return new CapacitorBankMenu(pContainerId, this, pPlayerInventory);
     }
 
+    // TODO: allow the exposed storage to be IEnergyStorage.
     @Override
     public @Nullable MachineEnergyStorage createExposedEnergyStorage() {
-        return new MultiEnergyStorageWrapper(this, EnergyIOMode.Both, () -> tier);
+        return new MultiEnergyNetworkCapability(this, this, EnergyIOMode.Both);
     }
 
     @Override
     public void serverTick() {
         super.serverTick();
-        if (level.getGameTime() % AVERAGE_IO_OVER_X_TICKS == 0 && node.getWrapper().get().getLastResetTime() != level.getGameTime()) {
-            if (node.getGraph() != null) {
-                addedEnergy = 0;
-                removedEnergy = 0;
-                List<GraphObject<Mergeable.Dummy>> nodes = new ArrayList<>(node.getGraph().getObjects());
-                for (GraphObject<Mergeable.Dummy> object : nodes) {
-                    if (object instanceof MultiEnergyNode graphNode) {
-                        addedEnergy += graphNode.getWrapper().get().getAddedEnergy();
-                        removedEnergy += graphNode.getWrapper().get().getRemovedEnergy();
-                        graphNode.getWrapper().get().resetEnergyStats(level.getGameTime());
-                    }
-                }
-
-                //Sync it back to other capacitor bank in this graph, only one can do this calculation, because each node is reset at once
-                for (GraphObject<Mergeable.Dummy> object : nodes) {
-                    if (object instanceof MultiEnergyNode graphNode && level.getBlockEntity(graphNode.pos) instanceof CapacitorBankBlockEntity capacitorBank) {
-                        capacitorBank.addedEnergy = addedEnergy;
-                        capacitorBank.removedEnergy = removedEnergy;
-                    }
-                }
-            }
-        }
-
-        if (level.getGameTime() % 200 == hashCode() % 200 && node.getGraph() != null && List.copyOf(node.getGraph().getObjects()).indexOf(node) == 0) {
-            long cumulativeEnergy = 0;
-            for (GraphObject<Mergeable.Dummy> object : node.getGraph().getObjects()) {
-                if (object instanceof MultiEnergyNode otherNode) {
-                    cumulativeEnergy += otherNode.getInternal().get().getEnergyStored();
-                }
-            }
-
-            int energyPerNode = (int)(cumulativeEnergy / node.getGraph().getObjects().size());
-
-            for (GraphObject<Mergeable.Dummy> object : node.getGraph().getObjects()) {
-                if (object instanceof MultiEnergyNode otherNode) {
-                    ((MachineEnergyStorage)(otherNode.getInternal().get())).setEnergyStored(Math.min(energyPerNode, (int)Math.min(cumulativeEnergy, Integer.MAX_VALUE)));
-                    cumulativeEnergy-=energyPerNode;
-                }
-            }
-
-            int remainingEnergy = (int)cumulativeEnergy;
-            if (remainingEnergy <= 0) {
-                return;
-            }
-
-            for (GraphObject<Mergeable.Dummy> object : node.getGraph().getObjects()) {
-                if (object instanceof MultiEnergyNode otherNode) {
-                    int received = otherNode.getInternal().get().receiveEnergy(remainingEnergy, false);
-                    remainingEnergy-=received;
-                    if (remainingEnergy <= 0) {
-                        return;
-                    }
-                }
-            }
-        }
+//        if (level.getGameTime() % AVERAGE_IO_OVER_X_TICKS == 0 && node.getWrapper().get().getLastResetTime() != level.getGameTime()) {
+//            if (node.getGraph() != null) {
+//                addedEnergy = 0;
+//                removedEnergy = 0;
+//                List<GraphObject<Mergeable.Dummy>> nodes = new ArrayList<>(node.getGraph().getObjects());
+//                for (GraphObject<Mergeable.Dummy> object : nodes) {
+//                    if (object instanceof MultiEnergyNode graphNode) {
+//                        addedEnergy += graphNode.getWrapper().get().getAddedEnergy();
+//                        removedEnergy += graphNode.getWrapper().get().getRemovedEnergy();
+//                        graphNode.getWrapper().get().resetEnergyStats(level.getGameTime());
+//                    }
+//                }
+//
+//                //Sync it back to other capacitor bank in this graph, only one can do this calculation, because each node is reset at once
+//                for (GraphObject<Mergeable.Dummy> object : nodes) {
+//                    if (object instanceof MultiEnergyNode graphNode && level.getBlockEntity(graphNode.pos) instanceof CapacitorBankBlockEntity capacitorBank) {
+//                        capacitorBank.addedEnergy = addedEnergy;
+//                        capacitorBank.removedEnergy = removedEnergy;
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (level.getGameTime() % 200 == hashCode() % 200 && node.getGraph() != null && List.copyOf(node.getGraph().getObjects()).indexOf(node) == 0) {
+//            long cumulativeEnergy = 0;
+//            for (GraphObject<Mergeable.Dummy> object : node.getGraph().getObjects()) {
+//                if (object instanceof MultiEnergyNode otherNode) {
+//                    cumulativeEnergy += otherNode.getInternal().get().getEnergyStored();
+//                }
+//            }
+//
+//            int energyPerNode = (int)(cumulativeEnergy / node.getGraph().getObjects().size());
+//
+//            for (GraphObject<Mergeable.Dummy> object : node.getGraph().getObjects()) {
+//                if (object instanceof MultiEnergyNode otherNode) {
+//                    ((MachineEnergyStorage)(otherNode.getInternal().get())).setEnergyStored(Math.min(energyPerNode, (int)Math.min(cumulativeEnergy, Integer.MAX_VALUE)));
+//                    cumulativeEnergy-=energyPerNode;
+//                }
+//            }
+//
+//            int remainingEnergy = (int)cumulativeEnergy;
+//            if (remainingEnergy <= 0) {
+//                return;
+//            }
+//
+//            for (GraphObject<Mergeable.Dummy> object : node.getGraph().getObjects()) {
+//                if (object instanceof MultiEnergyNode otherNode) {
+//                    int received = otherNode.getInternal().get().receiveEnergy(remainingEnergy, false);
+//                    remainingEnergy-=received;
+//                    if (remainingEnergy <= 0) {
+//                        return;
+//                    }
+//                }
+//            }
+//        }
     }
 
     @Override
@@ -160,6 +161,9 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
 
     @Override
     public void saveAdditional(CompoundTag pTag, HolderLookup.Provider lookupProvider) {
+        // Save energy before local energy storage is saved
+        MultiEnergyNetworkManager.saveNodes(this);
+
         super.saveAdditional(pTag, lookupProvider);
         pTag.put(DISPLAY_MODES, saveDisplayModes());
     }
@@ -194,12 +198,12 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
 
     @Override
     protected boolean shouldPushEnergyTo(Direction direction) {
-        if (node.getGraph() == null) {
+        if (graph == null) {
             return true;
         }
 
         if (level.getBlockEntity(worldPosition.relative(direction)) instanceof CapacitorBankBlockEntity capacitorBank) {
-            return capacitorBank.node.getGraph() != node.getGraph();
+            return capacitorBank.getGraph() != graph;
         }
 
         return true;
@@ -207,23 +211,20 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
 
     @Override
     public void setRemoved() {
-        if (node.getGraph() != null) {
-            node.getGraph().remove(node);
-        }
-
+        MultiEnergyNetworkManager.removeNode(this);
         super.setRemoved();
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
-        if (node.getGraph() == null) {
-            Graph.integrate(node, List.of());
+        if (graph == null) {
+            MultiEnergyNetworkManager.initNode(this, tier.getStorageCapacity());
         }
 
         for (Direction direction: Direction.values()) {
             if (level.getBlockEntity(worldPosition.relative(direction)) instanceof CapacitorBankBlockEntity capacitor && capacitor.tier == tier) {
-                Graph.connect(node, capacitor.node);
+                MultiEnergyNetworkManager.addNode(this, capacitor, tier.getStorageCapacity());
             }
         }
     }
@@ -238,14 +239,14 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
     }
 
     private List<BlockPos> getPositions() {
-        if (node.getGraph() == null) {
+        if (graph == null) {
             return List.of();
         }
 
         List<BlockPos> positions = new ArrayList<>();
-        for (GraphObject<Mergeable.Dummy> object : node.getGraph().getObjects()) {
-            if (object instanceof MultiEnergyNode otherNode) {
-                positions.add(otherNode.pos);
+        for (GraphObject<MultiEnergyGraphContext> object : graph.getObjects()) {
+            if (object instanceof CapacitorBankBlockEntity otherNode) {
+                positions.add(otherNode.getBlockPos());
             }
         }
         return positions;
@@ -283,7 +284,31 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
 
         return displayModes.get(direction);
     }
+
     public void setDisplayMode(Direction direction, DisplayMode mode) {
         displayModes.put(direction, mode);
+    }
+
+    @Override
+    public int getLocalEnergyStored() {
+        return getEnergyStorage().getEnergyStored();
+    }
+
+    @Override
+    public void setLocalEnergyStored(int energyStored) {
+        if (!level.isClientSide) {
+            getEnergyStorage().setEnergyStored(energyStored);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Graph<MultiEnergyGraphContext> getGraph() {
+        return graph;
+    }
+
+    @Override
+    public void setGraph(Graph<MultiEnergyGraphContext> graph) {
+        this.graph = graph;
     }
 }
