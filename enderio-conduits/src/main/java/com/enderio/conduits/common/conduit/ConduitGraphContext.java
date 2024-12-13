@@ -5,6 +5,7 @@ import com.enderio.conduits.api.Conduit;
 import com.enderio.conduits.api.ConduitNetworkContext;
 import com.enderio.conduits.api.ConduitNetworkContextAccessor;
 import com.enderio.conduits.api.ConduitNetworkContextType;
+import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.Mergeable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -70,12 +71,8 @@ public class ConduitGraphContext implements Mergeable<ConduitGraphContext>, Cond
     }
 
     @Override
-    public ConduitGraphContext copy() {
-        if (context == null) {
-            return this;
-        }
-
-        return new ConduitGraphContext(context.copy());
+    public ConduitGraphContext splitFor(int selfNodeCount, int totalNodeCount) {
+        return new ConduitGraphContext(context.splitFor(selfNodeCount, totalNodeCount));
     }
 
     // endregion

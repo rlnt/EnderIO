@@ -71,6 +71,7 @@ repositories {
             content {
                 includeGroup("com.enderio")
                 includeGroup("net.neoforged")
+                includeGroup("dev.gigaherz.graph")
             }
         }
     }

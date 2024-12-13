@@ -55,8 +55,14 @@ public class EnergyConduitNetworkContext implements ConduitNetworkContext<Energy
     }
 
     @Override
-    public EnergyConduitNetworkContext copy() {
-        return new EnergyConduitNetworkContext(energyStored);
+    public EnergyConduitNetworkContext splitFor(int selfNodeCount, int totalNodeCount) {
+        if (selfNodeCount == 0 || totalNodeCount == 0) {
+            return new EnergyConduitNetworkContext(0);
+        }
+
+        float ratio = selfNodeCount / (float) totalNodeCount;
+        float carriedEnergy = ratio * energyStored;
+        return new EnergyConduitNetworkContext(Math.round(carriedEnergy));
     }
 
     @Override
