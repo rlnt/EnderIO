@@ -9,15 +9,16 @@ import com.enderio.base.common.tag.EIOTags;
 import com.enderio.core.common.network.NetworkDataSlot;
 import com.enderio.machines.common.MachineNBTKeys;
 import com.enderio.machines.common.blockentity.base.PoweredMachineBlockEntity;
-import com.enderio.machines.common.blockentity.multienergy.MultiEnergyNode;
-import com.enderio.machines.common.blockentity.multienergy.MultiEnergyStorageWrapper;
+import com.enderio.machines.common.energy.multi.MultiEnergyGraphContext;
+import com.enderio.machines.common.energy.multi.MultiEnergyNetworkCapability;
+import com.enderio.machines.common.energy.multi.MultiEnergyNetworkManager;
+import com.enderio.machines.common.energy.multi.MultiEnergyNode;
 import com.enderio.machines.common.init.MachineBlockEntities;
 import com.enderio.machines.common.io.IOConfig;
 import com.enderio.machines.common.io.energy.MachineEnergyStorage;
 import com.enderio.machines.common.souldata.SolarSoul;
 import dev.gigaherz.graph3.Graph;
 import dev.gigaherz.graph3.GraphObject;
-import dev.gigaherz.graph3.Mergeable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -32,28 +33,26 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RecipesUpdatedEvent;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 
 import static com.enderio.machines.common.blockentity.PoweredSpawnerBlockEntity.NO_MOB;
 
-public class SolarPanelBlockEntity extends PoweredMachineBlockEntity {
+public class SolarPanelBlockEntity extends PoweredMachineBlockEntity implements MultiEnergyNode {
 
     private final ISolarPanelTier tier;
-
-    private final MultiEnergyNode node;
 
     private StoredEntityData entityData = StoredEntityData.EMPTY;
     private SolarSoul.SoulData soulData;
     private static boolean reload = false;
     private boolean reloadCache = !reload;
 
+    private @Nullable Graph<MultiEnergyGraphContext> graph;
+
     public SolarPanelBlockEntity(BlockPos worldPosition, BlockState blockState, SolarPanelTier tier) {
         super(EnergyIOMode.Output, new FixedScalable(tier::getStorageCapacity), new FixedScalable(tier::getStorageCapacity),
             MachineBlockEntities.SOLAR_PANELS.get(tier).get(), worldPosition, blockState);
 
         this.tier = tier;
-        this.node = new MultiEnergyNode(() -> energyStorage, () -> (MultiEnergyStorageWrapper) getExposedEnergyStorage(), worldPosition);
         addDataSlot(NetworkDataSlot.RESOURCE_LOCATION.create(() -> this.getEntityType().orElse(NO_MOB),this::setEntityType));
     }
 
@@ -65,14 +64,15 @@ public class SolarPanelBlockEntity extends PoweredMachineBlockEntity {
 
     @Override
     public @Nullable MachineEnergyStorage createExposedEnergyStorage() {
-        return new MultiEnergyStorageWrapper(this, EnergyIOMode.Output, () -> tier);
+        return new MultiEnergyNetworkCapability(this, this, EnergyIOMode.Both);
     }
 
     @Override
     public void serverTick() {
         if (isGenerating()) {
-            getEnergyStorage().addEnergy(getGenerationRate());
+            getExposedEnergyStorage().addEnergy(getGenerationRate());
         }
+
         if (reloadCache != reload && entityData.hasEntity()) {
             Optional<SolarSoul.SoulData> op = SolarSoul.SOLAR.matches(entityData.entityType().get());
             op.ifPresent(data -> soulData = data);
@@ -166,13 +166,13 @@ public class SolarPanelBlockEntity extends PoweredMachineBlockEntity {
 
     @Override
     protected boolean shouldPushEnergyTo(Direction direction) {
-        if (node.getGraph() == null) {
+        if (graph == null) {
             return true;
         }
 
-        for (GraphObject<Mergeable.Dummy> neighbour : node.getGraph().getNeighbours(node)) {
-            if (neighbour instanceof MultiEnergyNode neighbourMultiEnergyNode) {
-                if (neighbourMultiEnergyNode.pos.equals(worldPosition.relative(direction))) {
+        for (GraphObject<MultiEnergyGraphContext> neighbour : graph.getNeighbours(this)) {
+            if (neighbour instanceof SolarPanelBlockEntity neighbourMultiEnergyNode) {
+                if (neighbourMultiEnergyNode.getBlockPos().equals(worldPosition.relative(direction))) {
                     return false;
                 }
             }
@@ -183,8 +183,8 @@ public class SolarPanelBlockEntity extends PoweredMachineBlockEntity {
 
     @Override
     public void setRemoved() {
-        if (node.getGraph() != null) {
-            node.getGraph().remove(node);
+        if (!level.isClientSide && graph != null) {
+            MultiEnergyNetworkManager.removeNode(this);
         }
 
         super.setRemoved();
@@ -193,13 +193,16 @@ public class SolarPanelBlockEntity extends PoweredMachineBlockEntity {
     @Override
     public void onLoad() {
         super.onLoad();
-        if (node.getGraph() == null) {
-            Graph.integrate(node, List.of());
-        }
 
-        for (Direction direction: new Direction[] {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
-            if (level.getBlockEntity(worldPosition.relative(direction)) instanceof SolarPanelBlockEntity panel && panel.tier == tier) {
-                Graph.connect(node, panel.node);
+        if (!level.isClientSide) {
+            if (graph == null) {
+                MultiEnergyNetworkManager.initNode(this, tier.getStorageCapacity());
+            }
+
+            for (Direction direction: new Direction[] {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
+                if (level.getBlockEntity(worldPosition.relative(direction)) instanceof SolarPanelBlockEntity panel && panel.tier == tier) {
+                    MultiEnergyNetworkManager.addNode(this, panel, panel.tier.getStorageCapacity());
+                }
             }
         }
     }
@@ -237,9 +240,14 @@ public class SolarPanelBlockEntity extends PoweredMachineBlockEntity {
 
     @Override
     public void saveAdditional(CompoundTag pTag, HolderLookup.Provider lookupProvider) {
-        pTag.put(MachineNBTKeys.ENTITY_STORAGE, entityData.saveOptional(lookupProvider));
+        // Save energy before local energy storage is saved
+        if (!level.isClientSide) {
+            MultiEnergyNetworkManager.saveNodes(this);
+        }
 
         super.saveAdditional(pTag, lookupProvider);
+
+        pTag.put(MachineNBTKeys.ENTITY_STORAGE, entityData.saveOptional(lookupProvider));
     }
 
     @Override
@@ -268,5 +276,28 @@ public class SolarPanelBlockEntity extends PoweredMachineBlockEntity {
     @SubscribeEvent
     static void onReload(RecipesUpdatedEvent event) {
         reload = !reload;
+    }
+
+    @Override
+    public int getLocalEnergyStored() {
+        return getEnergyStorage().getEnergyStored();
+    }
+
+    @Override
+    public void setLocalEnergyStored(int energyStored) {
+        if (!level.isClientSide) {
+            getEnergyStorage().setEnergyStored(energyStored);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Graph<MultiEnergyGraphContext> getGraph() {
+        return graph;
+    }
+
+    @Override
+    public void setGraph(Graph<MultiEnergyGraphContext> graph) {
+        this.graph = graph;
     }
 }

@@ -208,10 +208,12 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
 
     @Override
     public void setRemoved() {
-        if (!level.isClientSide()) {
-            MultiEnergyNetworkManager.removeNode(this);
-        } else {
-            graph.remove(this);
+        if (graph != null) {
+            if (!level.isClientSide()) {
+                MultiEnergyNetworkManager.removeNode(this);
+            } else {
+                graph.remove(this);
+            }
         }
 
         super.setRemoved();
@@ -228,7 +230,7 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
 
             for (Direction direction: Direction.values()) {
                 if (level.getBlockEntity(worldPosition.relative(direction)) instanceof CapacitorBankBlockEntity capacitor && capacitor.tier == tier) {
-                    MultiEnergyNetworkManager.addNode(this, capacitor, tier.getStorageCapacity());
+                    MultiEnergyNetworkManager.addNode(this, capacitor, capacitor.tier.getStorageCapacity());
                 }
             }
         } else {
