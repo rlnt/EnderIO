@@ -44,7 +44,6 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
     private long addedEnergy = 0;
     private long removedEnergy = 0;
     public static final int AVERAGE_IO_OVER_X_TICKS = 10;
-    private final List<BlockPos> clientConfigurables = new ArrayList<>();
 
     private @Nullable Graph<MultiEnergyGraphContext> graph;
 
@@ -62,16 +61,12 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
     public static final NetworkDataSlot.CodecType<Map<Direction, DisplayMode>> DISPLAY_MODE_MAP_DATA_SLOT_TYPE =
         NetworkDataSlot.CodecType.createMap(Direction.CODEC, DisplayMode.CODEC, Direction.STREAM_CODEC.cast(), DisplayMode.STREAM_CODEC.cast());
 
-    public static final NetworkDataSlot.CodecType<List<BlockPos>> POSITION_LIST_DATA_SLOT_TYPE =
-        NetworkDataSlot.CodecType.createList(BlockPos.CODEC, BlockPos.STREAM_CODEC.cast());
-
     public CapacitorBankBlockEntity(BlockPos worldPosition, BlockState blockState, CapacitorTier tier) {
         super(EnergyIOMode.Both, new FixedScalable(tier::getStorageCapacity), new FixedScalable(tier::getStorageCapacity), MachineBlockEntities.CAPACITOR_BANKS.get(tier).get(), worldPosition, blockState);
         this.tier = tier;
 
         addDataSlot(NetworkDataSlot.LONG.create(() -> addedEnergy, data -> addedEnergy = data));
         addDataSlot(NetworkDataSlot.LONG.create(() -> removedEnergy, data -> removedEnergy = data));
-        addDataSlot(POSITION_LIST_DATA_SLOT_TYPE.create(this::getPositions, this::setPositions));
         addDataSlot(DISPLAY_MODE_MAP_DATA_SLOT_TYPE.create(() -> displayModes, displayModes::putAll));
     }
 
@@ -162,7 +157,9 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
     @Override
     public void saveAdditional(CompoundTag pTag, HolderLookup.Provider lookupProvider) {
         // Save energy before local energy storage is saved
-        MultiEnergyNetworkManager.saveNodes(this);
+        if (!level.isClientSide) {
+            MultiEnergyNetworkManager.saveNodes(this);
+        }
 
         super.saveAdditional(pTag, lookupProvider);
         pTag.put(DISPLAY_MODES, saveDisplayModes());
@@ -211,34 +208,46 @@ public class CapacitorBankBlockEntity extends PoweredMachineBlockEntity implemen
 
     @Override
     public void setRemoved() {
-        MultiEnergyNetworkManager.removeNode(this);
+        if (!level.isClientSide()) {
+            MultiEnergyNetworkManager.removeNode(this);
+        } else {
+            graph.remove(this);
+        }
+
         super.setRemoved();
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
-        if (graph == null) {
-            MultiEnergyNetworkManager.initNode(this, tier.getStorageCapacity());
-        }
 
-        for (Direction direction: Direction.values()) {
-            if (level.getBlockEntity(worldPosition.relative(direction)) instanceof CapacitorBankBlockEntity capacitor && capacitor.tier == tier) {
-                MultiEnergyNetworkManager.addNode(this, capacitor, tier.getStorageCapacity());
+        if (!level.isClientSide) {
+            if (graph == null) {
+                MultiEnergyNetworkManager.initNode(this, tier.getStorageCapacity());
+            }
+
+            for (Direction direction: Direction.values()) {
+                if (level.getBlockEntity(worldPosition.relative(direction)) instanceof CapacitorBankBlockEntity capacitor && capacitor.tier == tier) {
+                    MultiEnergyNetworkManager.addNode(this, capacitor, tier.getStorageCapacity());
+                }
+            }
+        } else {
+            // TODO: A different strategy for getting all of the locations for the IOconfig widget, for now we just use the graph.
+            if (graph == null) {
+                Graph.integrate(this, List.of());
+            }
+
+            for (Direction direction: Direction.values()) {
+                if (level.getBlockEntity(worldPosition.relative(direction)) instanceof CapacitorBankBlockEntity capacitor && capacitor.tier == tier) {
+                    Graph.connect(this, capacitor);
+                }
             }
         }
     }
 
     @Override
     public List<BlockPos> getConfigurables() {
-        return clientConfigurables;
-    }
-
-    private void setPositions(List<BlockPos> list) {
-        clientConfigurables.clear(); clientConfigurables.addAll(list);
-    }
-
-    private List<BlockPos> getPositions() {
+        // TODO: Do we want to have a client-side graph for just this?
         if (graph == null) {
             return List.of();
         }
