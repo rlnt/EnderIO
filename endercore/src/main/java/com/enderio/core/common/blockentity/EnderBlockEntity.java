@@ -107,6 +107,8 @@ public class EnderBlockEntity extends BlockEntity {
      */
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag data = super.getUpdateTag(registries);
+
         ListTag dataList = new ListTag();
         for (int i = 0; i < dataSlots.size(); i++) {
             var slot = dataSlots.get(i);
@@ -119,8 +121,11 @@ public class EnderBlockEntity extends BlockEntity {
             dataList.add(slotTag);
         }
 
-        CompoundTag data = new CompoundTag();
         data.put(DATA, dataList);
+
+        // NEW: Add synced data properties.
+        saveAdditionalSynced(data, registries);
+
         return data;
     }
 
@@ -130,6 +135,8 @@ public class EnderBlockEntity extends BlockEntity {
      */
     @Override
     public void handleUpdateTag(CompoundTag syncData, HolderLookup.Provider lookupProvider) {
+        super.handleUpdateTag(syncData, lookupProvider);
+
         if (syncData.contains(DATA, Tag.TAG_LIST)) {
             ListTag dataList = syncData.getList(DATA, Tag.TAG_COMPOUND);
 
@@ -168,11 +175,13 @@ public class EnderBlockEntity extends BlockEntity {
         return buf.array();
     }
 
+    @Deprecated(forRemoval = true, since = "7.1")
     public <T extends NetworkDataSlot<?>> T addDataSlot(T slot) {
         dataSlots.add(slot);
         return slot;
     }
 
+    @Deprecated(forRemoval = true, since = "7.1")
     public void addAfterSyncRunnable(Runnable runnable) {
         afterDataSync.add(runnable);
     }
@@ -180,6 +189,7 @@ public class EnderBlockEntity extends BlockEntity {
     /**
      * Fire this when you change the value of a {@link NetworkDataSlot} on the client side.
      */
+    @Deprecated(forRemoval = true, since = "7.1")
     @EnsureSide(EnsureSide.Side.CLIENT)
     public <T> void clientUpdateSlot(@Nullable NetworkDataSlot<T> slot, T value) {
         if (slot == null) {
@@ -198,6 +208,7 @@ public class EnderBlockEntity extends BlockEntity {
     /**
      * Sync the BlockEntity to all tracking players. Don't call this if you don't know what you do
      */
+    @Deprecated(forRemoval = true, since = "7.1")
     @EnsureSide(EnsureSide.Side.SERVER)
     public void sync() {
         var syncData = createBufferSlotUpdate();
@@ -208,6 +219,7 @@ public class EnderBlockEntity extends BlockEntity {
         }
     }
 
+    @Deprecated(forRemoval = true, since = "7.1")
     @EnsureSide(EnsureSide.Side.CLIENT)
     public void clientHandleBufferSync(RegistryFriendlyByteBuf buf) {
         for (int amount = buf.readInt(); amount > 0; amount--) {
@@ -220,6 +232,7 @@ public class EnderBlockEntity extends BlockEntity {
         }
     }
 
+    @Deprecated(forRemoval = true, since = "7.1")
     @EnsureSide(EnsureSide.Side.SERVER)
     public void serverHandleBufferChange(RegistryFriendlyByteBuf buf) {
         int index;
@@ -230,6 +243,21 @@ public class EnderBlockEntity extends BlockEntity {
         }
 
         dataSlots.get(index).read(buf);
+    }
+
+    // New Sync
+
+    @Override
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        saveAdditionalSynced(tag, registries);
+    }
+
+    /**
+     * Override this to write data which should be synced over the network.
+     * Must be opted-in by overriding {@link BlockEntity#getUpdatePacket}.
+     */
+    protected void saveAdditionalSynced(CompoundTag tag, HolderLookup.Provider registries) {
     }
 
     // endregion

@@ -1,24 +1,20 @@
 package com.enderio.machines.common.integrations.jei.util;
 
-import com.enderio.machines.common.recipe.EnchanterRecipe;
+import com.enderio.machines.common.blocks.enchanter.EnchanterRecipe;
+import java.util.Arrays;
+import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.Tags;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class WrappedEnchanterRecipe implements Recipe<EnchanterRecipe.Input> {
     private final RecipeHolder<EnchanterRecipe> recipe;
@@ -42,7 +38,9 @@ public class WrappedEnchanterRecipe implements Recipe<EnchanterRecipe.Input> {
     }
 
     public List<ItemStack> getLapis() {
-        return Arrays.stream(Ingredient.of(Tags.Items.GEMS_LAPIS).getItems()).peek(item -> item.setCount(recipe.value().getLapisForLevel(level))).toList();
+        return Arrays.stream(Ingredient.of(Tags.Items.GEMS_LAPIS).getItems())
+                .peek(item -> item.setCount(recipe.value().getLapisForLevel(level)))
+                .toList();
     }
 
     public ItemStack getBook() {

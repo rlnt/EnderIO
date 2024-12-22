@@ -7,7 +7,7 @@ import com.enderio.conduits.common.conduit.block.ConduitBundleBlock;
 import com.enderio.conduits.common.conduit.block.ConduitBundleBlockEntity;
 import com.enderio.conduits.common.init.ConduitMenus;
 import com.enderio.conduits.common.network.ConduitMenuSelectionPacket;
-import com.enderio.core.common.menu.BaseBlockEntityMenu;
+import com.enderio.core.common.menu.LegacyBaseBlockEntityMenu;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -22,11 +22,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 
-public class ConduitMenu extends BaseBlockEntityMenu<ConduitBundleBlockEntity> {
+public class ConduitMenu extends LegacyBaseBlockEntityMenu<ConduitBundleBlockEntity> {
     private Direction direction;
     private Holder<Conduit<?>> conduit;
 
-    public ConduitMenu(@Nullable ConduitBundleBlockEntity blockEntity, Inventory inventory, int pContainerId, Direction direction, Holder<Conduit<?>> conduit) {
+    public ConduitMenu(@Nullable ConduitBundleBlockEntity blockEntity, Inventory inventory, int pContainerId,
+            Direction direction, Holder<Conduit<?>> conduit) {
         super(ConduitMenus.CONDUIT_MENU.get(), pContainerId, blockEntity, inventory);
 
         this.direction = direction;
@@ -36,14 +37,15 @@ public class ConduitMenu extends BaseBlockEntityMenu<ConduitBundleBlockEntity> {
             for (Direction forDirection : Direction.values()) {
                 for (int i = 0; i < ConduitBundle.MAX_CONDUITS; i++) {
                     for (SlotType slotType : SlotType.values()) {
-                        addSlot(new ConduitSlot(blockEntity.getBundle(),conduitItemHandler, () -> this.direction, forDirection,
-                            () -> blockEntity.getBundle().getConduits().indexOf(this.conduit), i, slotType));
+                        addSlot(new ConduitSlot(blockEntity.getBundle(), conduitItemHandler, () -> this.direction,
+                                forDirection, () -> blockEntity.getBundle().getConduits().indexOf(this.conduit), i,
+                                slotType));
                     }
                 }
             }
         }
 
-        addPlayerInventorySlots(23,113);
+        addPlayerInventorySlots(23, 113);
     }
 
     @Override
@@ -54,10 +56,11 @@ public class ConduitMenu extends BaseBlockEntityMenu<ConduitBundleBlockEntity> {
             ItemStack itemInSlot = slot.getItem();
             resultItemStack = itemInSlot.copy();
             if (pIndex < this.slots.size() - PLAYER_INVENTORY_SIZE) {
-                if (!this.moveItemStackTo(itemInSlot, this.slots.size() -  PLAYER_INVENTORY_SIZE, this.slots.size(), true)) {
+                if (!this.moveItemStackTo(itemInSlot, this.slots.size() - PLAYER_INVENTORY_SIZE, this.slots.size(),
+                        true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.moveItemStackTo(itemInSlot, 0, this.slots.size() -  PLAYER_INVENTORY_SIZE, false)) {
+            } else if (!this.moveItemStackTo(itemInSlot, 0, this.slots.size() - PLAYER_INVENTORY_SIZE, false)) {
                 return ItemStack.EMPTY;
             }
 
@@ -73,15 +76,15 @@ public class ConduitMenu extends BaseBlockEntityMenu<ConduitBundleBlockEntity> {
 
     @Override
     public boolean stillValid(Player player) {
-        return getBlockEntity() != null
-            && getBlockEntity().stillValid(player)
-            //usually called serverside only, but I want to have a clientcheck for type, to close the screen clientside immediatly
-            && (player instanceof ServerPlayer ||clientValid());
+        return getBlockEntity() != null && getBlockEntity().stillValid(player)
+        // usually called serverside only, but I want to have a clientcheck for type, to
+        // close the screen clientside immediatly
+                && (player instanceof ServerPlayer || clientValid());
     }
 
     private boolean clientValid() {
         return getBlockEntity().getBundle().getConduits().contains(conduit)
-            && ConduitBundleBlock.canBeOrIsValidConnection(getBlockEntity(), conduit, direction);
+                && ConduitBundleBlock.canBeOrIsValidConnection(getBlockEntity(), conduit, direction);
     }
 
     public static ConduitMenu factory(int pContainerId, Inventory inventory, RegistryFriendlyByteBuf buf) {
@@ -119,9 +122,12 @@ public class ConduitMenu extends BaseBlockEntityMenu<ConduitBundleBlockEntity> {
     @Override
     public void removed(Player player) {
         super.removed(player);
-        if (getBlockEntity() != null
-            && player instanceof ServerPlayer serverPlayer
-            && serverPlayer.serverLevel().players().stream().filter(p -> p != player).noneMatch(p -> p.containerMenu instanceof ConduitMenu)) {
+        if (getBlockEntity() != null && player instanceof ServerPlayer serverPlayer
+                && serverPlayer.serverLevel()
+                        .players()
+                        .stream()
+                        .filter(p -> p != player)
+                        .noneMatch(p -> p.containerMenu instanceof ConduitMenu)) {
             getBlockEntity().updateEmptyDynConnection();
         }
     }

@@ -2,7 +2,7 @@ package com.enderio.machines.client.gui.screen;
 
 import com.enderio.EnderIOBase;
 import com.enderio.core.client.gui.screen.EnderContainerScreen;
-import com.enderio.machines.common.menu.EnchanterMenu;
+import com.enderio.machines.common.blocks.enchanter.EnchanterMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -34,13 +34,15 @@ public class EnchanterScreen extends EnderContainerScreen<EnchanterMenu> {
             return;
         }
 
-        int colour = 8453920; //green
+        int colour = 8453920; // green
         MutableComponent component = Component.translatable("container.repair.cost", this.getMenu().getCurrentCost());
-        if (Minecraft.getInstance().player.experienceLevel < this.getMenu().getCurrentCost() && !Minecraft.getInstance().player.isCreative()) {
-            colour = 16736352; //red
+        if (Minecraft.getInstance().player.experienceLevel < this.getMenu().getCurrentCost()
+                && !Minecraft.getInstance().player.isCreative()) {
+            colour = 16736352; // red
         }
 
-        guiGraphics.drawCenteredString(this.font, component, (width-getXSize())/2 + getXSize()/2, (height-getYSize())/2 + 57, colour);
+        guiGraphics.drawCenteredString(this.font, component, (width - getXSize()) / 2 + getXSize() / 2,
+                (height - getYSize()) / 2 + 57, colour);
     }
 
     @Override

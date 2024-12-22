@@ -7,7 +7,7 @@ import com.enderio.base.common.lang.EIOLang;
 import com.enderio.machines.client.gui.screen.base.MachineScreen;
 import com.enderio.machines.client.gui.widget.ActivityWidget;
 import com.enderio.machines.client.gui.widget.CapacitorEnergyWidget;
-import com.enderio.machines.common.menu.RelocatorObeliskMenu;
+import com.enderio.machines.common.blocks.obelisks.relocator.RelocatorObeliskMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
@@ -25,7 +25,8 @@ public class RelocatorObeliskScreen extends MachineScreen<RelocatorObeliskMenu> 
     private static final ResourceLocation MINUS = EnderIOBase.loc("buttons/minus_small");
     private static final WidgetSprites PLUS_SPRITES = new WidgetSprites(PLUS, PLUS);
     private static final WidgetSprites MINUS_SPRITES = new WidgetSprites(MINUS, MINUS);
-    private static final ResourceLocation RANGE_BUTTON_TEXTURE = EnderIOBase.loc("textures/gui/icons/range_buttons.png");
+    private static final ResourceLocation RANGE_BUTTON_TEXTURE = EnderIOBase
+            .loc("textures/gui/icons/range_buttons.png");
 
     public RelocatorObeliskScreen(RelocatorObeliskMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
@@ -38,22 +39,20 @@ public class RelocatorObeliskScreen extends MachineScreen<RelocatorObeliskMenu> 
     protected void init() {
         super.init();
 
-        addRenderableOnly(new CapacitorEnergyWidget(16 + leftPos, 14 + topPos, 9, 42, menu::getEnergyStorage, menu::isCapacitorInstalled));
+        addRenderableOnly(new CapacitorEnergyWidget(16 + leftPos, 14 + topPos, 9, 42, menu::getEnergyStorage,
+                menu::isCapacitorInstalled));
 
-        addRenderableWidget(new RedstoneControlPickerWidget(leftPos + imageWidth - 6 - 16, topPos + 6, menu::getRedstoneControl, menu::setRedstoneControl, EIOLang.REDSTONE_MODE));
+        addRenderableWidget(new RedstoneControlPickerWidget(leftPos + imageWidth - 6 - 16, topPos + 6,
+                menu::getRedstoneControl, menu::setRedstoneControl, EIOLang.REDSTONE_MODE));
 
-        addRenderableWidget(EIOCommonWidgets.createRange(
-            leftPos + imageWidth - 6 - 16,
-            topPos + 34,
-            EIOLang.HIDE_RANGE,
-            EIOLang.SHOW_RANGE,
-            menu::isRangeVisible,
-            menu::setRangeVisible));
+        addRenderableWidget(EIOCommonWidgets.createRange(leftPos + imageWidth - 6 - 16, topPos + 34, EIOLang.HIDE_RANGE,
+                EIOLang.SHOW_RANGE, menu::isRangeVisible,
+                (ignored) -> handleButtonPress(RelocatorObeliskMenu.VISIBILITY_BUTTON_ID)));
 
         addRenderableWidget(new ImageButton(leftPos + imageWidth - 2 * 16, topPos + 2 + 16 * 2, 8, 8, PLUS_SPRITES,
-            (b) -> menu.increaseRange()));
+                (b) -> handleButtonPress(RelocatorObeliskMenu.INCREASE_BUTTON_ID)));
         addRenderableWidget(new ImageButton(leftPos + imageWidth - 2 * 16, topPos + 2 + 16 * 2 + 8, 8, 8, MINUS_SPRITES,
-            (b) -> menu.decreaseRange()));
+                (b) -> handleButtonPress(RelocatorObeliskMenu.DECREASE_BUTTON_ID)));
 
         addRenderableWidget(new ActivityWidget(leftPos + imageWidth - 6 - 16, topPos + 16 * 4, menu::getMachineStates));
     }
@@ -61,7 +60,9 @@ public class RelocatorObeliskScreen extends MachineScreen<RelocatorObeliskMenu> 
     @Override
     public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
         super.render(guiGraphics, pMouseX, pMouseY, pPartialTicks);
-        guiGraphics.drawString(font, getMenu().getBlockEntity().getRange() + "", leftPos + imageWidth - 8 - 16 - font.width(getMenu().getBlockEntity().getRange() + "") - 10, topPos + 16*2 + 6, 0, false);
+        guiGraphics.drawString(font, getMenu().getBlockEntity().getRange() + "",
+                leftPos + imageWidth - 8 - 16 - font.width(getMenu().getBlockEntity().getRange() + "") - 10,
+                topPos + 16 * 2 + 6, 0, false);
     }
 
     @Override

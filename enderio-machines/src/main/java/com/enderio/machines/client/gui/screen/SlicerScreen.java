@@ -5,11 +5,9 @@ import com.enderio.base.client.gui.widget.RedstoneControlPickerWidget;
 import com.enderio.base.common.lang.EIOLang;
 import com.enderio.machines.client.gui.screen.base.MachineScreen;
 import com.enderio.machines.client.gui.widget.ActivityWidget;
-import com.enderio.machines.client.gui.widget.CapacitorEnergyWidget;
 import com.enderio.machines.client.gui.widget.NewCapacitorEnergyWidget;
 import com.enderio.machines.client.gui.widget.NewProgressWidget;
-import com.enderio.machines.client.gui.widget.ProgressWidget;
-import com.enderio.machines.common.menu.SlicerMenu;
+import com.enderio.machines.common.blocks.slicer.SlicerMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -37,13 +35,16 @@ public class SlicerScreen extends MachineScreen<SlicerMenu> {
         super.init();
         centerAlignTitleLabelX();
 
-        addRenderableOnly(NewProgressWidget.leftRight(leftPos + 98, topPos + 61, 24, 16, PROGRESS_SPRITE, menu::getCraftingProgress, true));
+        addRenderableOnly(NewProgressWidget.leftRight(leftPos + 98, topPos + 61, 24, 16, PROGRESS_SPRITE,
+                menu::getCraftingProgress, true));
 
         addRenderableOnly(new ActivityWidget(leftPos + 153, topPos + 89, menu::getMachineStates, true));
 
-        addRenderableOnly(new NewCapacitorEnergyWidget(leftPos + 7, topPos + 27, menu::getEnergyStorage, menu::isCapacitorInstalled));
+        addRenderableOnly(new NewCapacitorEnergyWidget(leftPos + 7, topPos + 27, menu::getEnergyStorage,
+                menu::isCapacitorInstalled));
 
-        addRenderableWidget(new RedstoneControlPickerWidget(leftPos + imageWidth - 6 - 16, topPos + 6 + 55, menu::getRedstoneControl, menu::setRedstoneControl, EIOLang.REDSTONE_MODE));
+        addRenderableWidget(new RedstoneControlPickerWidget(leftPos + imageWidth - 6 - 16, topPos + 6 + 55,
+                menu::getRedstoneControl, menu::setRedstoneControl, EIOLang.REDSTONE_MODE));
 
         var overlay = addIOConfigOverlay(1, leftPos + 7, topPos + 125, 162, 76);
         addIOConfigButton(leftPos + imageWidth - 6 - 16, topPos + 6 + 55 - 16 - 2, overlay);

@@ -8,7 +8,7 @@ import com.enderio.machines.client.gui.widget.ActivityWidget;
 import com.enderio.machines.client.gui.widget.CapacitorEnergyWidget;
 import com.enderio.machines.client.gui.widget.ExperienceCraftingWidget;
 import com.enderio.machines.client.gui.widget.ProgressWidget;
-import com.enderio.machines.common.menu.SoulBinderMenu;
+import com.enderio.machines.common.blocks.soul_binder.SoulBinderMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -30,14 +30,17 @@ public class SoulBinderScreen extends MachineScreen<SoulBinderMenu> {
     protected void init() {
         super.init();
 
-        addRenderableOnly(new ProgressWidget.LeftRight(BG_TEXTURE, menu::getCraftingProgress, getGuiLeft() + 80, getGuiTop() + 34, 24, 17, 176, 14));
+        addRenderableOnly(new ProgressWidget.LeftRight(BG_TEXTURE, menu::getCraftingProgress, getGuiLeft() + 80,
+                getGuiTop() + 34, 24, 17, 176, 14));
 
-        addRenderableOnly(new CapacitorEnergyWidget(16 + leftPos, 14 + topPos, 9, 42, menu::getEnergyStorage, menu::isCapacitorInstalled));
+        addRenderableOnly(new CapacitorEnergyWidget(16 + leftPos, 14 + topPos, 9, 42, menu::getEnergyStorage,
+                menu::isCapacitorInstalled));
 
-        addRenderableWidget(new RedstoneControlPickerWidget(leftPos + imageWidth - 6 - 16, topPos + 6, menu::getRedstoneControl, menu::setRedstoneControl,
-            EIOLang.REDSTONE_MODE));
+        addRenderableWidget(new RedstoneControlPickerWidget(leftPos + imageWidth - 6 - 16, topPos + 6,
+                menu::getRedstoneControl, menu::setRedstoneControl, EIOLang.REDSTONE_MODE));
 
-        addRenderableOnly(new ExperienceCraftingWidget(56 + leftPos, 68 + topPos, 65, 5, menu::getFluidTank, menu::getExperience));
+        addRenderableOnly(new ExperienceCraftingWidget(56 + leftPos, 68 + topPos, 65, 5, menu::getFluidTank,
+                menu::getExperience));
 
         addRenderableWidget(new ActivityWidget(leftPos + imageWidth - 6 - 16, topPos + 16 * 4, menu::getMachineStates));
 
