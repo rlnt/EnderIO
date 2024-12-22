@@ -267,11 +267,21 @@ public class ConduitBundleBlockEntity extends EnderBlockEntity {
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider lookupProvider) {
         super.loadAdditional(tag, lookupProvider);
 
-        bundle = ConduitBundle.parse(lookupProvider, tag.getCompound(ConduitNBTKeys.CONDUIT_BUNDLE));
-        bundle.setOnChangedRunnable(this::scheduleTick);
+        // loadAdditional is now called by the sync system
+        // ideally we'll need presence checks to find bundle issues, but for now we're making this safe.
 
-        lazyNodeNBT = tag.getList(ConduitNBTKeys.CONDUIT_EXTRA_DATA, Tag.TAG_COMPOUND);
-        conduitItemHandler.deserializeNBT(lookupProvider, tag.getCompound(CONDUIT_INV_KEY));
+        if (tag.contains(ConduitNBTKeys.CONDUIT_BUNDLE)) {
+            bundle = ConduitBundle.parse(lookupProvider, tag.getCompound(ConduitNBTKeys.CONDUIT_BUNDLE));
+            bundle.setOnChangedRunnable(this::scheduleTick);
+        }
+
+        if (tag.contains(ConduitNBTKeys.CONDUIT_EXTRA_DATA)) {
+            lazyNodeNBT = tag.getList(ConduitNBTKeys.CONDUIT_EXTRA_DATA, Tag.TAG_COMPOUND);
+        }
+
+        if (tag.contains(CONDUIT_INV_KEY)) {
+            conduitItemHandler.deserializeNBT(lookupProvider, tag.getCompound(CONDUIT_INV_KEY));
+        }
     }
 
     @Override
