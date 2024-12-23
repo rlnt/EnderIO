@@ -121,7 +121,7 @@ public class PoweredMachineEnergyStorage implements IEnergyStorage, INBTSerializ
         }
 
         int energyReceived = Mth.clamp(getMaxEnergyStored() - energyStored, 0, maxReceive);
-        if (simulate) {
+        if (!simulate) {
             setEnergyStored(energyStored + energyReceived);
         }
 
@@ -136,7 +136,7 @@ public class PoweredMachineEnergyStorage implements IEnergyStorage, INBTSerializ
 
         int energyExtracted = Math.min(energyStored, maxExtract);
 
-        if (simulate) {
+        if (!simulate) {
             setEnergyStored(energyStored - energyExtracted);
         }
 
