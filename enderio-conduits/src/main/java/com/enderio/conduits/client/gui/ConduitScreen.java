@@ -135,7 +135,7 @@ public class ConduitScreen extends EnderContainerScreen<ConduitMenu> {
                 new RedstoneControlPickerWidget(pos.x() + 90, pos.y() + 40,
                     () -> getOnDynamic(dyn -> dyn.control(), RedstoneControl.ACTIVE_WITH_SIGNAL),
                     mode -> actOnDynamic(dyn -> dyn.withRedstoneMode(mode)),
-                    EIOLang.CONDUIT_CHANNEL));
+                    EIOLang.REDSTONE_MODE));
 
             addRenderableWidget(
                 new DyeColorPickerWidget(pos.x() + 90 + 20, pos.y() + 40,
