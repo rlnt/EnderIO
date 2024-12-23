@@ -7,22 +7,18 @@ import com.enderio.conduits.common.init.ConduitComponents;
 import com.enderio.conduits.common.init.ConduitIngredientTypes;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 
-import java.util.stream.Stream;
-
 public class ConduitIngredient implements ICustomIngredient {
 
     public static final MapCodec<ConduitIngredient> CODEC = RecordCodecBuilder.mapCodec(
-        builder -> builder
-            .group(
-                Conduit.CODEC.fieldOf("conduit_type").forGetter(ConduitIngredient::conduit)
-            ).apply(builder, ConduitIngredient::new)
-    );
+            builder -> builder.group(Conduit.CODEC.fieldOf("conduit_type").forGetter(ConduitIngredient::conduit))
+                    .apply(builder, ConduitIngredient::new));
 
     private final Holder<Conduit<?>> conduit;
 
@@ -49,7 +45,10 @@ public class ConduitIngredient implements ICustomIngredient {
         }
 
         Holder<Conduit<?>> conduit = stack.get(ConduitComponents.CONDUIT);
-        return this.conduit.value().equals(conduit);
+        if (conduit == null) {
+            return false;
+        }
+        return this.conduit.is(conduit);
     }
 
     @Override
