@@ -37,6 +37,10 @@ public class AlloySmeltingRecipe implements MachineRecipe<AlloySmeltingRecipe.Co
     private final boolean isSmelting;
 
     public AlloySmeltingRecipe(ResourceLocation id, List<CountedIngredient> inputs, ItemStack output, int energy, float experience, boolean isSmelting) {
+        if (isSmelting && inputs.size() > 1) {
+            throw new IllegalArgumentException("More than one smelting ingredient given");
+        }
+        
         this.id = id;
         this.inputs = inputs;
         this.output = output;
