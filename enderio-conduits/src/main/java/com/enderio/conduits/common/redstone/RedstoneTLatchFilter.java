@@ -21,15 +21,17 @@ public class RedstoneTLatchFilter implements RedstoneInsertFilter {
 
     @Override
     public int getOutputSignal(RedstoneConduitData data, DyeColor control) {
-        boolean active1 = isActive();
+        boolean output = isActive();
         if (data.isActive(control) && isDeactivated()) {
-            active1 = !active1;
-            setState(active1, false);
+            output = !output;
+            setState(output, false);
         }
-        if (!data.isActive(control)) {
-            setState(active1, true);
+
+        if (!data.isActive(control) && !isDeactivated()) {
+            setState(output, true);
         }
-        return active1 ? 15 : 0;
+
+        return output ? 15 : 0;
     }
 
     public boolean isActive() {
@@ -45,18 +47,12 @@ public class RedstoneTLatchFilter implements RedstoneInsertFilter {
     }
 
     public record Component(boolean active, boolean deactivated) {
-        public static final Codec<Component> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(Codec.BOOL.fieldOf("deactivated").forGetter(Component::active),
-                    Codec.BOOL.fieldOf("deactivated").forGetter(Component::deactivated))
-                .apply(instance, Component::new)
-        );
+        public static final Codec<Component> CODEC = RecordCodecBuilder.create(instance -> instance
+                .group(Codec.BOOL.fieldOf("deactivated").forGetter(Component::active),
+                        Codec.BOOL.fieldOf("deactivated").forGetter(Component::deactivated))
+                .apply(instance, Component::new));
 
-        public static final StreamCodec<ByteBuf, Component> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.BOOL,
-            Component::active,
-            ByteBufCodecs.BOOL,
-            Component::deactivated,
-            Component::new
-        );
+        public static final StreamCodec<ByteBuf, Component> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.BOOL,
+                Component::active, ByteBufCodecs.BOOL, Component::deactivated, Component::new);
     }
 }

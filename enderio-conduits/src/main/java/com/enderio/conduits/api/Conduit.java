@@ -5,6 +5,8 @@ import com.enderio.base.api.misc.RedstoneControl;
 import com.enderio.conduits.api.ticker.ConduitTicker;
 import com.enderio.conduits.api.upgrade.ConduitUpgrade;
 import com.mojang.serialization.Codec;
+import java.util.Set;
+import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -22,18 +24,15 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
-import java.util.function.Consumer;
-
-public interface Conduit<TConduit extends Conduit<TConduit>> extends
-    Comparable<TConduit>, TooltipProvider {
+public interface Conduit<TConduit extends Conduit<TConduit>> extends Comparable<TConduit>, TooltipProvider {
 
     Codec<Conduit<?>> DIRECT_CODEC = EnderIOConduitsRegistries.CONDUIT_TYPE.byNameCodec()
-        .dispatch(Conduit::type, ConduitType::codec);
+            .dispatch(Conduit::type, ConduitType::codec);
 
     Codec<Holder<Conduit<?>>> CODEC = RegistryFixedCodec.create(EnderIOConduitsRegistries.Keys.CONDUIT);
 
-    StreamCodec<RegistryFriendlyByteBuf, Holder<Conduit<?>>> STREAM_CODEC = ByteBufCodecs.holderRegistry(EnderIOConduitsRegistries.Keys.CONDUIT);
+    StreamCodec<RegistryFriendlyByteBuf, Holder<Conduit<?>>> STREAM_CODEC = ByteBufCodecs
+            .holderRegistry(EnderIOConduitsRegistries.Keys.CONDUIT);
 
     /**
      * Gets the default conduit texture.
@@ -64,6 +63,7 @@ public interface Conduit<TConduit extends Conduit<TConduit>> extends
      * @apiNote The ticker should never change, it can use the options to determine behaviour in its implementation.
      */
     ConduitTicker<TConduit> getTicker();
+
     ConduitMenuData getMenuData();
 
     default boolean canBeInSameBundle(Holder<Conduit<?>> otherConduit) {
@@ -91,6 +91,10 @@ public interface Conduit<TConduit extends Conduit<TConduit>> extends
 
     default boolean canConnectTo(Level level, BlockPos conduitPos, Direction direction) {
         return getTicker().canConnectTo(level, conduitPos, direction);
+    }
+
+    default boolean canForceConnectTo(Level level, BlockPos conduitPos, Direction direction) {
+        return getTicker().canForceConnectTo(level, conduitPos, direction);
     }
 
     /**
@@ -132,8 +136,8 @@ public interface Conduit<TConduit extends Conduit<TConduit>> extends
     // endregion
 
     @Nullable
-    default <TCapability, TContext> TCapability proxyCapability(BlockCapability<TCapability, TContext> capability, ConduitNode node, Level level, BlockPos pos,
-        @Nullable TContext context) {
+    default <TCapability, TContext> TCapability proxyCapability(BlockCapability<TCapability, TContext> capability,
+            ConduitNode node, Level level, BlockPos pos, @Nullable TContext context) {
         return null;
     }
 
@@ -141,10 +145,12 @@ public interface Conduit<TConduit extends Conduit<TConduit>> extends
         return new ConduitConnectionData(false, true, RedstoneControl.NEVER_ACTIVE);
     }
 
-    record ConduitConnectionData(boolean isInsert, boolean isExtract, RedstoneControl control) {}
+    record ConduitConnectionData(boolean isInsert, boolean isExtract, RedstoneControl control) {
+    }
 
     @Override
-    default void addToTooltip(Item.TooltipContext pContext, Consumer<Component> pTooltipAdder, TooltipFlag pTooltipFlag) {
+    default void addToTooltip(Item.TooltipContext pContext, Consumer<Component> pTooltipAdder,
+            TooltipFlag pTooltipFlag) {
     }
 
     /**
