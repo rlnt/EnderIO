@@ -1,6 +1,6 @@
 package com.enderio.machines.common.integrations.jei;
 
-import com.enderio.machines.client.gui.screen.base.LegacyMachineScreen;
+import com.enderio.machines.client.gui.screen.base.MachineScreen;
 import com.enderio.machines.common.blocks.base.menu.GhostMachineSlot;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
@@ -11,10 +11,11 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MachinesGhostSlotHandler implements IGhostIngredientHandler<LegacyMachineScreen> {
+@SuppressWarnings("rawtypes")
+public class MachinesGhostSlotHandler implements IGhostIngredientHandler<MachineScreen> {
 
     @Override
-    public <I> List<Target<I>> getTargetsTyped(LegacyMachineScreen gui, ITypedIngredient<I> ingredient,
+    public <I> List<Target<I>> getTargetsTyped(MachineScreen gui, ITypedIngredient<I> ingredient,
             boolean doStart) {
 
         if (ingredient.getType() == VanillaTypes.ITEM_STACK) {

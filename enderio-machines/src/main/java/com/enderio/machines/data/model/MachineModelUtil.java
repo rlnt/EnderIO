@@ -2,9 +2,9 @@ package com.enderio.machines.data.model;
 
 import com.enderio.base.api.EnderIO;
 import com.enderio.core.data.model.ModelHelper;
-import com.enderio.machines.common.block.LegacyProgressMachineBlock;
 import com.enderio.machines.common.block.SolarPanelBlock;
 import com.enderio.machines.common.blockentity.solar.SolarPanelTier;
+import com.enderio.machines.common.blocks.base.block.ProgressMachineBlock;
 import com.enderio.regilite.data.DataGenContext;
 import com.enderio.regilite.data.RegiliteItemModelProvider;
 import java.util.Locale;
@@ -87,7 +87,7 @@ public class MachineModelUtil {
             ModelFile unpowered, ModelFile powered) {
         prov.getVariantBuilder(ctx.get())
                 .forAllStates(state -> ConfiguredModel.builder()
-                        .modelFile(state.getValue(LegacyProgressMachineBlock.POWERED) ? powered : unpowered)
+                        .modelFile(state.getValue(ProgressMachineBlock.POWERED) ? powered : unpowered)
                         .rotationY(((int) state.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot() + 180) % 360)
                         .build());
     }
