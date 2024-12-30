@@ -1,9 +1,11 @@
 package com.enderio.machines.common.network;
 
+import com.enderio.machines.common.blocks.base.blockentity.MachineBlockEntity;
 import com.enderio.machines.common.blocks.crafter.CrafterMenu;
 import com.enderio.machines.common.souldata.EngineSoul;
 import com.enderio.machines.common.souldata.SolarSoul;
 import com.enderio.machines.common.souldata.SpawnerSoul;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class MachinePayloadHandler {
@@ -40,6 +42,17 @@ public class MachinePayloadHandler {
                     for (int i = 0; i < packet.recipeInputs().size(); i++) {
                         crafterMenu.slots.get(CrafterMenu.INPUTS_INDEX + i).set(packet.recipeInputs().get(i));
                     }
+                }
+            });
+        }
+
+        public void handleCycleIOConfigPacket(CycleIOConfigPacket packet, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                var level = context.player().level();
+                BlockEntity be = level.getBlockEntity(packet.pos());
+
+                if (be instanceof MachineBlockEntity machineBlockEntity) {
+                    machineBlockEntity.cycleIOMode(packet.side());
                 }
             });
         }
