@@ -1,6 +1,7 @@
 package com.enderio.machines.client.gui.widget.ioconfig;
 
 import com.enderio.EnderIOBase;
+import com.enderio.base.api.EnderIO;
 import com.enderio.base.api.io.IOConfigurable;
 import com.enderio.base.common.lang.EIOLang;
 import com.enderio.core.client.gui.screen.BaseOverlay;
@@ -502,8 +503,8 @@ public class IOConfigOverlay extends BaseOverlay {
         private static final Map<RenderType, RenderType> REMAPPED_TYPES = new IdentityHashMap<>();
 
         private SolidRenderLayer(RenderType original) {
-            super(String.format("%s_%s_solid", original, EnderIOBase.REGISTRY_NAMESPACE), original.format(),
-                    original.mode(), original.bufferSize(), original.affectsCrumbling(), true, () -> {
+            super(String.format("%s_%s_solid", original, EnderIO.NAMESPACE), original.format(), original.mode(),
+                    original.bufferSize(), original.affectsCrumbling(), true, () -> {
                         original.setupRenderState();
 
                         RenderSystem.disableDepthTest();
@@ -527,8 +528,8 @@ public class IOConfigOverlay extends BaseOverlay {
         private static final Map<RenderType, RenderType> REMAPPED_TYPES = new IdentityHashMap<>();
 
         private GhostRenderLayer(RenderType original) {
-            super(String.format("%s_%s_ghost", original, EnderIOBase.REGISTRY_NAMESPACE), original.format(),
-                    original.mode(), original.bufferSize(), original.affectsCrumbling(), true, () -> {
+            super(String.format("%s_%s_ghost", original, EnderIO.NAMESPACE), original.format(), original.mode(),
+                    original.bufferSize(), original.affectsCrumbling(), true, () -> {
                         original.setupRenderState();
 
                         RenderSystem.disableDepthTest();

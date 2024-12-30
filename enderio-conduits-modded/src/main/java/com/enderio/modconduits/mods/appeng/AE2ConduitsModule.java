@@ -3,6 +3,7 @@ package com.enderio.modconduits.mods.appeng;
 import appeng.api.AECapabilities;
 import appeng.api.ids.AEItemIds;
 import com.enderio.EnderIOBase;
+import com.enderio.base.api.EnderIO;
 import com.enderio.base.common.init.EIOItems;
 import com.enderio.conduits.api.Conduit;
 import com.enderio.conduits.api.ConduitApi;
@@ -42,9 +43,9 @@ public class AE2ConduitsModule implements ConduitModule {
     private static final ModLoadedCondition CONDITION = new ModLoadedCondition("ae2");
 
     public static final DeferredRegister<ConduitType<?>> CONDUIT_TYPES = DeferredRegister
-            .create(EnderIOConduitsRegistries.CONDUIT_TYPE, ModdedConduits.REGISTRY_NAMESPACE);
+            .create(EnderIOConduitsRegistries.CONDUIT_TYPE, EnderIO.NAMESPACE);
     public static final DeferredRegister<ConduitDataType<?>> CONDUIT_DATA_TYPES = DeferredRegister
-            .create(EnderIOConduitsRegistries.CONDUIT_DATA_TYPE, ModdedConduits.REGISTRY_NAMESPACE);
+            .create(EnderIOConduitsRegistries.CONDUIT_DATA_TYPE, EnderIO.NAMESPACE);
 
     public static final DeferredHolder<ConduitType<?>, ConduitType<MEConduit>> AE2_CONDUIT = CONDUIT_TYPES.register(
             "me",

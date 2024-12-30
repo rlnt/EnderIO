@@ -5,6 +5,7 @@ import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
 import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
 
 import com.enderio.EnderIOBase;
+import com.enderio.base.api.EnderIO;
 import com.enderio.base.common.integrations.jei.JEIUtils;
 import com.enderio.machines.common.blocks.slicer.SlicingRecipe;
 import com.enderio.machines.common.init.MachineBlocks;
@@ -27,8 +28,8 @@ import net.neoforged.neoforge.common.Tags;
 
 public class SlicingRecipeCategory extends MachineRecipeCategory<RecipeHolder<SlicingRecipe>> {
 
-    public static final RecipeType<RecipeHolder<SlicingRecipe>> TYPE = JEIUtils
-            .createRecipeType(EnderIOBase.REGISTRY_NAMESPACE, "slicing", SlicingRecipe.class);
+    public static final RecipeType<RecipeHolder<SlicingRecipe>> TYPE = JEIUtils.createRecipeType(EnderIO.NAMESPACE,
+            "slicing", SlicingRecipe.class);
 
     public static final ResourceLocation BG_TEXTURE = EnderIOBase.loc("textures/gui/viewer/slice_and_splice.png");
     private static final int WIDTH = 108;

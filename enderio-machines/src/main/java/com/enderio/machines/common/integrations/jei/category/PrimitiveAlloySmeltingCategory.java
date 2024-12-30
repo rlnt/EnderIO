@@ -4,7 +4,7 @@ import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
 import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
 import static mezz.jei.api.recipe.RecipeIngredientRole.RENDER_ONLY;
 
-import com.enderio.EnderIOBase;
+import com.enderio.base.api.EnderIO;
 import com.enderio.base.common.integrations.jei.JEIUtils;
 import com.enderio.machines.client.gui.screen.PrimitiveAlloySmelterScreen;
 import com.enderio.machines.client.gui.screen.StirlingGeneratorScreen;
@@ -35,7 +35,7 @@ import org.jetbrains.annotations.Nullable;
 public class PrimitiveAlloySmeltingCategory extends MachineRecipeCategory<RecipeHolder<AlloySmeltingRecipe>> {
 
     public static final RecipeType<RecipeHolder<AlloySmeltingRecipe>> TYPE = JEIUtils
-            .createRecipeType(EnderIOBase.REGISTRY_NAMESPACE, "primitive_alloy_smelting", AlloySmeltingRecipe.class);
+            .createRecipeType(EnderIO.NAMESPACE, "primitive_alloy_smelting", AlloySmeltingRecipe.class);
 
     private final IDrawable background;
     private final IDrawable icon;

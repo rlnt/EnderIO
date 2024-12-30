@@ -1,6 +1,6 @@
 package com.enderio.machines;
 
-import com.enderio.EnderIOBase;
+import com.enderio.base.api.EnderIO;
 import com.enderio.base.api.integration.IntegrationManager;
 import com.enderio.base.data.EIODataProvider;
 import com.enderio.machines.common.blocks.base.menu.GhostMachineSlot;
@@ -56,9 +56,8 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 @Mod(EnderIOMachines.MODULE_MOD_ID)
 public class EnderIOMachines {
     public static final String MODULE_MOD_ID = "enderio_machines";
-    public static final String REGISTRY_NAMESPACE = EnderIOBase.REGISTRY_NAMESPACE;
 
-    public static Regilite REGILITE = new Regilite(EnderIOBase.REGISTRY_NAMESPACE);
+    public static Regilite REGILITE = new Regilite(EnderIO.NAMESPACE);
 
     public EnderIOMachines(IEventBus modEventBus, ModContainer modContainer) {
         // Register machine config

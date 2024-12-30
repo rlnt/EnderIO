@@ -1,6 +1,7 @@
 package com.enderio.machines.common.init;
 
 import com.enderio.EnderIOBase;
+import com.enderio.base.api.EnderIO;
 import com.enderio.core.common.recipes.RecipeTypeSerializerPair;
 import com.enderio.machines.common.blocks.alloy.AlloySmeltingRecipe;
 import com.enderio.machines.common.blocks.enchanter.EnchanterRecipe;
@@ -22,9 +23,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public class MachineRecipes {
 
     private static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(Registries.RECIPE_TYPE,
-            EnderIOBase.REGISTRY_NAMESPACE);
+            EnderIO.NAMESPACE);
     private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister
-            .create(Registries.RECIPE_SERIALIZER, EnderIOBase.REGISTRY_NAMESPACE);
+            .create(Registries.RECIPE_SERIALIZER, EnderIO.NAMESPACE);
 
     public static final RecipeTypeSerializerPair<EnchanterRecipe, EnchanterRecipe.Serializer> ENCHANTING = register(
             "enchanting", EnchanterRecipe.Serializer::new);

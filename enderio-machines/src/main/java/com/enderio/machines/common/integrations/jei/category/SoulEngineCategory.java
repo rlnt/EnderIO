@@ -1,6 +1,6 @@
 package com.enderio.machines.common.integrations.jei.category;
 
-import com.enderio.EnderIOBase;
+import com.enderio.base.api.EnderIO;
 import com.enderio.base.api.attachment.StoredEntityData;
 import com.enderio.base.common.init.EIODataComponents;
 import com.enderio.base.common.init.EIOItems;
@@ -40,8 +40,8 @@ import net.neoforged.neoforge.fluids.FluidStack;
 
 public class SoulEngineCategory implements IRecipeCategory<EngineSoul.SoulData> {
 
-    public static final RecipeType<EngineSoul.SoulData> TYPE = RecipeType.create(EnderIOBase.REGISTRY_NAMESPACE,
-            "soul_engine", EngineSoul.SoulData.class);
+    public static final RecipeType<EngineSoul.SoulData> TYPE = RecipeType.create(EnderIO.NAMESPACE, "soul_engine",
+            EngineSoul.SoulData.class);
     private final IDrawableStatic background;
     private final IDrawable icon;
 

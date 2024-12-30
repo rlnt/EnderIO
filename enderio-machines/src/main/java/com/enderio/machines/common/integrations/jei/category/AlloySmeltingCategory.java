@@ -5,6 +5,7 @@ import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
 import static mezz.jei.api.recipe.RecipeIngredientRole.RENDER_ONLY;
 
 import com.enderio.EnderIOBase;
+import com.enderio.base.api.EnderIO;
 import com.enderio.base.common.integrations.jei.JEIUtils;
 import com.enderio.machines.client.gui.screen.StirlingGeneratorScreen;
 import com.enderio.machines.common.blocks.alloy.AlloySmeltingRecipe;
@@ -37,7 +38,7 @@ public class AlloySmeltingCategory extends MachineRecipeCategory<RecipeHolder<Al
     private static final int HEIGHT = 73;
 
     public static final RecipeType<RecipeHolder<AlloySmeltingRecipe>> TYPE = JEIUtils
-            .createRecipeType(EnderIOBase.REGISTRY_NAMESPACE, "alloy_smelting", AlloySmeltingRecipe.class);
+            .createRecipeType(EnderIO.NAMESPACE, "alloy_smelting", AlloySmeltingRecipe.class);
 
     private final IDrawable background;
     private final IDrawable icon;

@@ -5,6 +5,7 @@ import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
 import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
 
 import com.enderio.EnderIOBase;
+import com.enderio.base.api.EnderIO;
 import com.enderio.base.api.grindingball.GrindingBallData;
 import com.enderio.base.common.init.EIODataComponents;
 import com.enderio.base.common.integrations.jei.JEIUtils;
@@ -38,8 +39,8 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
 public class SagMillCategory extends MachineRecipeCategory<RecipeHolder<SagMillingRecipe>> {
-    public static final RecipeType<RecipeHolder<SagMillingRecipe>> TYPE = JEIUtils
-            .createRecipeType(EnderIOBase.REGISTRY_NAMESPACE, "sagmilling", SagMillingRecipe.class);
+    public static final RecipeType<RecipeHolder<SagMillingRecipe>> TYPE = JEIUtils.createRecipeType(EnderIO.NAMESPACE,
+            "sagmilling", SagMillingRecipe.class);
 
     private static final ResourceLocation BG_TEXTURE = EnderIOBase.loc("textures/gui/viewer/sag_mill.png");
     private static final int WIDTH = 123;
