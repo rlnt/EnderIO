@@ -1,6 +1,5 @@
 package com.enderio.base.common.integrations.jei.category;
 
-import com.enderio.EnderIOBase;
 import com.enderio.base.api.EnderIO;
 import com.enderio.base.common.init.EIOFluids;
 import com.enderio.base.common.init.EIOItems;
@@ -55,7 +54,7 @@ public class FireCraftingCategory implements IRecipeCategory<RecipeHolder<FireCr
     public static final RecipeType<RecipeHolder<FireCraftingRecipe>> TYPE = JEIUtils.createRecipeType(EnderIO.NAMESPACE,
             "fire_crafting", FireCraftingRecipe.class);
 
-    private static final ResourceLocation BG_LOCATION = EnderIOBase.loc("textures/gui/jei_infinity.png");
+    private static final ResourceLocation BG_LOCATION = EnderIO.loc("textures/gui/jei_infinity.png");
 
     private final IDrawable background;
     private final IDrawable icon;

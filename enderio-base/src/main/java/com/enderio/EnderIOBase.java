@@ -73,11 +73,6 @@ public class EnderIOBase {
 
     public static Regilite REGILITE = new Regilite(EnderIO.NAMESPACE);
 
-    @Deprecated(since = "7.1")
-    public static ResourceLocation loc(String path) {
-        return EnderIO.loc(path);
-    }
-
     public static IEventBus modEventBus;
     public static ModContainer modContainer;
 

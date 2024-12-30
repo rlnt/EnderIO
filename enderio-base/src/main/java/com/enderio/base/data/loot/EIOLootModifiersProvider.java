@@ -1,6 +1,5 @@
 package com.enderio.base.data.loot;
 
-import com.enderio.EnderIOBase;
 import com.enderio.base.api.EnderIO;
 import com.enderio.base.common.loot.BrokenSpawnerLootModifier;
 import java.util.concurrent.CompletableFuture;
@@ -69,6 +68,6 @@ public class EIOLootModifiersProvider extends GlobalLootModifierProvider {
         add(modifierName,
                 new AddTableLootModifier(
                         new LootItemCondition[] { AnyOfCondition.anyOf(mappedTargetConditions).build() },
-                        ResourceKey.create(Registries.LOOT_TABLE, EnderIOBase.loc("chests/" + modifierName))));
+                        ResourceKey.create(Registries.LOOT_TABLE, EnderIO.loc("chests/" + modifierName))));
     }
 }

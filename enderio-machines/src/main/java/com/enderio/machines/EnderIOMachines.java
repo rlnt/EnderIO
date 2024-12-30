@@ -34,8 +34,6 @@ import com.enderio.machines.data.recipes.TankRecipeProvider;
 import com.enderio.machines.data.souldata.SoulDataProvider;
 import com.enderio.machines.data.tag.MachineEntityTypeTagsProvider;
 import com.enderio.regilite.Regilite;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
@@ -51,6 +49,9 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
 import net.neoforged.neoforge.common.data.AdvancementProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @EventBusSubscriber(modid = EnderIOMachines.MODULE_MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 @Mod(EnderIOMachines.MODULE_MOD_ID)

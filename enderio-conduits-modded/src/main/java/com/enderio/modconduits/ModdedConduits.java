@@ -1,7 +1,5 @@
 package com.enderio.modconduits;
 
-import static java.util.Map.entry;
-
 import com.enderio.base.api.EnderIO;
 import com.enderio.conduits.api.EnderIOConduitsRegistries;
 import com.enderio.modconduits.data.ModConduitRecipeProvider;
@@ -10,11 +8,6 @@ import com.enderio.modconduits.mods.appeng.AE2ConduitsModule;
 import com.enderio.modconduits.mods.mekanism.MekanismModule;
 import com.enderio.modconduits.mods.refinedstorage.RefinedStorageModule;
 import com.enderio.regilite.Regilite;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceKey;
@@ -26,6 +19,14 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import static java.util.Map.entry;
 
 @EventBusSubscriber(modid = ModdedConduits.MODULE_MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 @Mod(ModdedConduits.MODULE_MOD_ID)

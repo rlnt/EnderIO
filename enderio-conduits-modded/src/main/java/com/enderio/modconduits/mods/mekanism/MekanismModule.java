@@ -1,6 +1,5 @@
 package com.enderio.modconduits.mods.mekanism;
 
-import com.enderio.EnderIOBase;
 import com.enderio.base.api.EnderIO;
 import com.enderio.base.common.init.EIOCapabilities;
 import com.enderio.base.common.init.EIOCreativeTabs;
@@ -17,8 +16,6 @@ import com.enderio.regilite.holder.RegiliteItem;
 import com.enderio.regilite.holder.RegiliteMenu;
 import com.enderio.regilite.registry.ItemRegistry;
 import com.enderio.regilite.registry.MenuRegistry;
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.heat.IHeatHandler;
@@ -47,6 +44,9 @@ import net.neoforged.neoforge.capabilities.ItemCapability;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public class MekanismModule implements ConduitModule {
 
@@ -106,29 +106,29 @@ public class MekanismModule implements ConduitModule {
     }
 
     public static final ResourceKey<Conduit<?>> CHEMICAL = ResourceKey.create(EnderIOConduitsRegistries.Keys.CONDUIT,
-            EnderIOBase.loc("chemical"));
+        EnderIO.loc("chemical"));
     public static final ResourceKey<Conduit<?>> PRESSURIZED_CHEMICAL = ResourceKey
-            .create(EnderIOConduitsRegistries.Keys.CONDUIT, EnderIOBase.loc("pressurized_chemical"));
+            .create(EnderIOConduitsRegistries.Keys.CONDUIT, EnderIO.loc("pressurized_chemical"));
     public static final ResourceKey<Conduit<?>> ENDER_CHEMICAL = ResourceKey
-            .create(EnderIOConduitsRegistries.Keys.CONDUIT, EnderIOBase.loc("ender_chemical"));
+            .create(EnderIOConduitsRegistries.Keys.CONDUIT, EnderIO.loc("ender_chemical"));
     public static final ResourceKey<Conduit<?>> HEAT = ResourceKey.create(EnderIOConduitsRegistries.Keys.CONDUIT,
-            EnderIOBase.loc("heat"));
+        EnderIO.loc("heat"));
 
     public static final Supplier<ConduitDataType<ChemicalConduitData>> CHEMICAL_DATA_TYPE = CONDUIT_DATA_TYPES
             .register("chemical", () -> new ConduitDataType<>(ChemicalConduitData.CODEC,
                     ChemicalConduitData.STREAM_CODEC, ChemicalConduitData::new));
 
-    private static final Component LANG_HEAT_CONDUIT = addTranslation("item", EnderIOBase.loc("conduit.heat"),
+    private static final Component LANG_HEAT_CONDUIT = addTranslation("item", EnderIO.loc("conduit.heat"),
             "Heat Conduit");
-    private static final Component LANG_CHEMICAL_CONDUIT = addTranslation("item", EnderIOBase.loc("conduit.chemical"),
+    private static final Component LANG_CHEMICAL_CONDUIT = addTranslation("item", EnderIO.loc("conduit.chemical"),
             "Chemical Conduit");
     private static final Component LANG_PRESSURIZED_CHEMICAL_CONDUIT = addTranslation("item",
-            EnderIOBase.loc("conduit.pressurized_chemical"), "Pressurized Chemical Conduit");
+            EnderIO.loc("conduit.pressurized_chemical"), "Pressurized Chemical Conduit");
     private static final Component LANG_ENDER_CHEMICAL_CONDUIT = addTranslation("item",
-            EnderIOBase.loc("conduit.ender_chemical"), "Ender Chemical Conduit");
+            EnderIO.loc("conduit.ender_chemical"), "Ender Chemical Conduit");
 
     public static final Component LANG_MULTI_CHEMICAL_TOOLTIP = addTranslation("item",
-            EnderIOBase.loc("conduit.chemical.multi"),
+            EnderIO.loc("conduit.chemical.multi"),
             "Allows multiple chemical types to be transported on the same line");
 
     private static final TagKey<Item> OSMIUM = ItemTags
@@ -149,13 +149,13 @@ public class MekanismModule implements ConduitModule {
 
     @Override
     public void bootstrapConduits(BootstrapContext<Conduit<?>> context) {
-        context.register(HEAT, new HeatConduit(EnderIOBase.loc("block/conduit/heat"), LANG_HEAT_CONDUIT));
+        context.register(HEAT, new HeatConduit(EnderIO.loc("block/conduit/heat"), LANG_HEAT_CONDUIT));
         context.register(CHEMICAL,
-                new ChemicalConduit(EnderIOBase.loc("block/conduit/chemical"), LANG_CHEMICAL_CONDUIT, 750, false));
+                new ChemicalConduit(EnderIO.loc("block/conduit/chemical"), LANG_CHEMICAL_CONDUIT, 750, false));
         context.register(PRESSURIZED_CHEMICAL,
-                new ChemicalConduit(EnderIOBase.loc("block/conduit/pressurized_chemical"),
+                new ChemicalConduit(EnderIO.loc("block/conduit/pressurized_chemical"),
                         LANG_PRESSURIZED_CHEMICAL_CONDUIT, 2_000, false));
-        context.register(ENDER_CHEMICAL, new ChemicalConduit(EnderIOBase.loc("block/conduit/ender_chemical"),
+        context.register(ENDER_CHEMICAL, new ChemicalConduit(EnderIO.loc("block/conduit/ender_chemical"),
                 LANG_ENDER_CHEMICAL_CONDUIT, 64_000, true));
     }
 
@@ -186,7 +186,7 @@ public class MekanismModule implements ConduitModule {
                         BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(MekanismAPI.MEKANISM_MODID,
                                 "basic_pressurized_tube")))
                 .unlockedBy("has_ingredient", InventoryChangeTrigger.TriggerInstance.hasItems(EIOItems.CONDUIT_BINDER))
-                .save(mekRecipeOutput, EnderIOBase.loc("mek_basic_pressurized_tube"));
+                .save(mekRecipeOutput, EnderIO.loc("mek_basic_pressurized_tube"));
 
         ShapedRecipeBuilder
                 .shaped(RecipeCategory.BUILDING_BLOCKS,
@@ -199,7 +199,7 @@ public class MekanismModule implements ConduitModule {
                         BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(MekanismAPI.MEKANISM_MODID,
                                 "advanced_pressurized_tube")))
                 .unlockedBy("has_ingredient", InventoryChangeTrigger.TriggerInstance.hasItems(EIOItems.CONDUIT_BINDER))
-                .save(mekRecipeOutput, EnderIOBase.loc("mek_advanced_pressurized_tube"));
+                .save(mekRecipeOutput, EnderIO.loc("mek_advanced_pressurized_tube"));
 
         ShapedRecipeBuilder
                 .shaped(RecipeCategory.BUILDING_BLOCKS,
@@ -212,7 +212,7 @@ public class MekanismModule implements ConduitModule {
                         BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(MekanismAPI.MEKANISM_MODID,
                                 "elite_pressurized_tube")))
                 .unlockedBy("has_ingredient", InventoryChangeTrigger.TriggerInstance.hasItems(EIOItems.CONDUIT_BINDER))
-                .save(mekRecipeOutput, EnderIOBase.loc("mek_elite_pressurized_tube"));
+                .save(mekRecipeOutput, EnderIO.loc("mek_elite_pressurized_tube"));
 
         ShapedRecipeBuilder
                 .shaped(RecipeCategory.BUILDING_BLOCKS,
@@ -225,7 +225,7 @@ public class MekanismModule implements ConduitModule {
                         BuiltInRegistries.ITEM.get(
                                 ResourceLocation.fromNamespaceAndPath(MekanismAPI.MEKANISM_MODID, "alloy_infused")))
                 .unlockedBy("has_ingredient", InventoryChangeTrigger.TriggerInstance.hasItems(EIOItems.CONDUIT_BINDER))
-                .save(mekRecipeOutput, EnderIOBase.loc("mek_basic_pressurized_tube_upgrade"));
+                .save(mekRecipeOutput, EnderIO.loc("mek_basic_pressurized_tube_upgrade"));
 
         ShapedRecipeBuilder
                 .shaped(RecipeCategory.BUILDING_BLOCKS,
@@ -238,7 +238,7 @@ public class MekanismModule implements ConduitModule {
                         BuiltInRegistries.ITEM.get(
                                 ResourceLocation.fromNamespaceAndPath(MekanismAPI.MEKANISM_MODID, "alloy_reinforced")))
                 .unlockedBy("has_ingredient", InventoryChangeTrigger.TriggerInstance.hasItems(EIOItems.CONDUIT_BINDER))
-                .save(mekRecipeOutput, EnderIOBase.loc("mek_advanced_pressurized_tube_upgrade"));
+                .save(mekRecipeOutput, EnderIO.loc("mek_advanced_pressurized_tube_upgrade"));
 
         ShapedRecipeBuilder
                 .shaped(RecipeCategory.BUILDING_BLOCKS, ConduitApiImpl.INSTANCE.getStackForType(heatConduit, 3))
@@ -250,7 +250,7 @@ public class MekanismModule implements ConduitModule {
                         BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(MekanismAPI.MEKANISM_MODID,
                                 "advanced_thermodynamic_conductor")))
                 .unlockedBy("has_ingredient", InventoryChangeTrigger.TriggerInstance.hasItems(EIOItems.CONDUIT_BINDER))
-                .save(mekRecipeOutput, EnderIOBase.loc("mek_advanced_thermodynamic_conductor"));
+                .save(mekRecipeOutput, EnderIO.loc("mek_advanced_thermodynamic_conductor"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BASIC_CHEMICAL_FILTER)
                 .pattern(" P ")
@@ -260,6 +260,6 @@ public class MekanismModule implements ConduitModule {
                 .define('O', OSMIUM)
                 .unlockedBy("has_ingredient",
                         InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(OSMIUM)))
-                .save(mekRecipeOutput, EnderIOBase.loc("mek_chemical_filter"));
+                .save(mekRecipeOutput, EnderIO.loc("mek_chemical_filter"));
     }
 }

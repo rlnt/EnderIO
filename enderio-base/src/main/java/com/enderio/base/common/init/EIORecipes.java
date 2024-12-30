@@ -1,6 +1,5 @@
 package com.enderio.base.common.init;
 
-import com.enderio.EnderIOBase;
 import com.enderio.base.api.EnderIO;
 import com.enderio.base.common.recipe.FireCraftingRecipe;
 import com.enderio.base.common.recipe.ShapedEntityStorageRecipe;
@@ -30,7 +29,7 @@ public class EIORecipes {
 
     private static <R extends Recipe<?>, S extends RecipeSerializer<? extends R>> RecipeTypeSerializerPair<R, S> register(
             String name, Supplier<S> serializerFactory) {
-        var type = RECIPE_TYPES.<RecipeType<R>>register(name, () -> RecipeType.simple(EnderIOBase.loc(name)));
+        var type = RECIPE_TYPES.<RecipeType<R>>register(name, () -> RecipeType.simple(EnderIO.loc(name)));
         var serializer = RECIPE_SERIALIZERS.register(name, serializerFactory);
         return new RecipeTypeSerializerPair<>(type, serializer);
     }

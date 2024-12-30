@@ -1,10 +1,5 @@
 package com.enderio.machines.common.integrations.jei.category;
 
-import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
-import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
-import static mezz.jei.api.recipe.RecipeIngredientRole.RENDER_ONLY;
-
-import com.enderio.EnderIOBase;
 import com.enderio.base.api.EnderIO;
 import com.enderio.base.common.integrations.jei.JEIUtils;
 import com.enderio.machines.client.gui.screen.StirlingGeneratorScreen;
@@ -13,8 +8,6 @@ import com.enderio.machines.common.init.MachineBlocks;
 import com.enderio.machines.common.integrations.jei.util.MachineRecipeCategory;
 import com.enderio.machines.common.integrations.jei.util.RecipeUtil;
 import com.enderio.machines.common.lang.MachineLang;
-import java.util.Arrays;
-import java.util.List;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.drawable.IDrawableAnimated;
@@ -31,9 +24,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static mezz.jei.api.recipe.RecipeIngredientRole.*;
+
 public class AlloySmeltingCategory extends MachineRecipeCategory<RecipeHolder<AlloySmeltingRecipe>> {
 
-    public static final ResourceLocation BG_TEXTURE = EnderIOBase.loc("textures/gui/viewer/alloy_smelter.png");
+    public static final ResourceLocation BG_TEXTURE = EnderIO.loc("textures/gui/viewer/alloy_smelter.png");
     private static final int WIDTH = 67 + 40; // + 40 text space
     private static final int HEIGHT = 73;
 

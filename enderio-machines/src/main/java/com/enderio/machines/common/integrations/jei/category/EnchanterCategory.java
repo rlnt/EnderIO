@@ -1,8 +1,5 @@
 package com.enderio.machines.common.integrations.jei.category;
 
-import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
-import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
-
 import com.enderio.base.api.EnderIO;
 import com.enderio.machines.client.gui.screen.EnchanterScreen;
 import com.enderio.machines.common.init.MachineBlocks;
@@ -25,6 +22,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.jetbrains.annotations.Nullable;
+
+import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
+import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
 
 public class EnchanterCategory extends MachineRecipeCategory<WrappedEnchanterRecipe> {
 

@@ -17,17 +17,17 @@ public class EIOCreativeTabs {
             .create(Registries.CREATIVE_MODE_TAB, EnderIO.NAMESPACE);
 
     public static final ResourceKey<CreativeModeTab> MAIN = ResourceKey.create(Registries.CREATIVE_MODE_TAB,
-            EnderIOBase.loc("main"));
+            EnderIO.loc("main"));
     public static final ResourceKey<CreativeModeTab> GEAR = ResourceKey.create(Registries.CREATIVE_MODE_TAB,
-            EnderIOBase.loc("gear"));
+            EnderIO.loc("gear"));
     public static final ResourceKey<CreativeModeTab> BLOCKS = ResourceKey.create(Registries.CREATIVE_MODE_TAB,
-            EnderIOBase.loc("blocks"));
+            EnderIO.loc("blocks"));
     public static final ResourceKey<CreativeModeTab> MACHINES = ResourceKey.create(Registries.CREATIVE_MODE_TAB,
-            EnderIOBase.loc("machines"));
+            EnderIO.loc("machines"));
     public static final ResourceKey<CreativeModeTab> SOULS = ResourceKey.create(Registries.CREATIVE_MODE_TAB,
-            EnderIOBase.loc("souls"));
+            EnderIO.loc("souls"));
     public static final ResourceKey<CreativeModeTab> CONDUITS = ResourceKey.create(Registries.CREATIVE_MODE_TAB,
-            EnderIOBase.loc("conduits"));
+            EnderIO.loc("conduits"));
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN_TAB = createTab(MAIN, "main", "Ender IO",
             tab -> tab.icon(() -> new ItemStack(EIOItems.CREATIVE_ICON_NONE.get()))

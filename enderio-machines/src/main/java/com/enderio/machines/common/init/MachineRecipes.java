@@ -1,6 +1,5 @@
 package com.enderio.machines.common.init;
 
-import com.enderio.EnderIOBase;
 import com.enderio.base.api.EnderIO;
 import com.enderio.core.common.recipes.RecipeTypeSerializerPair;
 import com.enderio.machines.common.blocks.alloy.AlloySmeltingRecipe;
@@ -45,12 +44,12 @@ public class MachineRecipes {
             "vat_fermenting", FermentingRecipe.Serializer::new);
 
     private static <I extends Recipe<?>> DeferredHolder<RecipeType<?>, RecipeType<I>> registerType(String name) {
-        return RECIPE_TYPES.register(name, () -> RecipeType.simple(EnderIOBase.loc(name)));
+        return RECIPE_TYPES.register(name, () -> RecipeType.simple(EnderIO.loc(name)));
     }
 
     private static <R extends Recipe<?>, S extends RecipeSerializer<? extends R>> RecipeTypeSerializerPair<R, S> register(
             String name, Supplier<S> serializerFactory) {
-        var type = RECIPE_TYPES.<RecipeType<R>>register(name, () -> RecipeType.simple(EnderIOBase.loc(name)));
+        var type = RECIPE_TYPES.<RecipeType<R>>register(name, () -> RecipeType.simple(EnderIO.loc(name)));
         var serializer = RECIPE_SERIALIZERS.register(name, serializerFactory);
         return new RecipeTypeSerializerPair<>(type, serializer);
     }
