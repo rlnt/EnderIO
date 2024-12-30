@@ -29,7 +29,7 @@ public class PaintedBlockColor implements BlockColor, ItemColor {
             if (entity instanceof PaintedBlockEntity paintedBlockEntity) {
 
                 Optional<Block> paint = paintedBlockEntity.getPrimaryPaint();
-                if (state.getBlock() instanceof PaintedSlabBlock && tintIndex < 0) {
+                if (state.getBlock() instanceof PaintedSlabBlock && tintIndex >= 0) {
                     paint = paintedBlockEntity.getSecondaryPaint();
                 }
 
@@ -61,11 +61,12 @@ public class PaintedBlockColor implements BlockColor, ItemColor {
     public static int moveTintIndex(int original) {
         return -original - 2;
     }
+
     public static int unmoveTintIndex(int original) {
         if (original > 0) {
             return original;
         } else {
-            return -original + 2;
+            return -original - 2;
         }
     }
 }
