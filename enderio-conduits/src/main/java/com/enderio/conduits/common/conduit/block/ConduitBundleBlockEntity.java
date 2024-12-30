@@ -222,6 +222,14 @@ public class ConduitBundleBlockEntity extends EnderBlockEntity {
         savedData.putUnloadedNodeIdentifier(conduit, this.worldPosition, node);
     }
 
+    @Override
+    public void setRemoved() {
+        super.setRemoved();
+        if (level != null && level.isClientSide) {
+            FACADES.remove(worldPosition);
+        }
+    }
+
     public void everyTick() {
         if (level != null && !level.isClientSide) {
             serverTick();
