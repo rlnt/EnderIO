@@ -70,7 +70,7 @@ public final class FluidConduitScreenExtension implements ConduitScreenExtension
             if (isHoveredOrFocused()) {
                 MutableComponent tooltip = EIOLang.FLUID_CONDUIT_CHANGE_FLUID1.copy();
                 tooltip.append("\n").append(EIOLang.FLUID_CONDUIT_CHANGE_FLUID2);
-                if (currentFluid.get() != null) {
+                if (!currentFluid.get().isSame(Fluids.EMPTY)) {
                     tooltip.append("\n").append(TooltipUtil.withArgs(EIOLang.FLUID_CONDUIT_CHANGE_FLUID3, currentFluid.get().getFluidType().getDescription()));
                 }
                 setTooltip(Tooltip.create(TooltipUtil.style(tooltip)));
@@ -80,7 +80,7 @@ public final class FluidConduitScreenExtension implements ConduitScreenExtension
             RenderSystem.defaultBlendFunc();
             RenderSystem.enableDepthTest();
             guiGraphics.blit(WIDGET_TEXTURE, getX(), getY(), 0, 0, this.width, this.height);
-            if (currentFluid.get() == null) {
+            if (currentFluid.get().isSame(Fluids.EMPTY)) {
                 return;
             }
 
