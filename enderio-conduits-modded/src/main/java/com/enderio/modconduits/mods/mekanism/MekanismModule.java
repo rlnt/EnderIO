@@ -8,6 +8,7 @@ import com.enderio.conduits.api.Conduit;
 import com.enderio.conduits.api.ConduitDataType;
 import com.enderio.conduits.api.ConduitType;
 import com.enderio.conduits.api.EnderIOConduitsRegistries;
+import com.enderio.conduits.api.screen.RegisterConduitScreenExtensionsEvent;
 import com.enderio.conduits.common.conduit.ConduitApiImpl;
 import com.enderio.conduits.common.recipe.ConduitIngredient;
 import com.enderio.modconduits.ConduitModule;
@@ -131,6 +132,13 @@ public class MekanismModule implements ConduitModule {
             EnderIO.loc("conduit.chemical.multi"),
             "Allows multiple chemical types to be transported on the same line");
 
+    public static final Component CHEMICAL_CONDUIT_CHANGE_FLUID1 = addTranslation("gui",
+        EnderIO.loc("chemical_conduit.change_fluid1"), "Locked Chemical:");
+    public static final Component CHEMICAL_CONDUIT_CHANGE_FLUID2 = addTranslation("gui",
+        EnderIO.loc("chemical_conduit.change_fluid2"), "Click to reset!");
+    public static final MutableComponent CHEMICAL_CONDUIT_CHANGE_FLUID3 = addTranslation("gui",
+        EnderIO.loc("chemical_conduit.change_fluid3"), "Chemical: %s");
+
     private static final TagKey<Item> OSMIUM = ItemTags
             .create(ResourceLocation.fromNamespaceAndPath("c", "ingots/osmium"));
 
@@ -145,6 +153,11 @@ public class MekanismModule implements ConduitModule {
         DATA_COMPONENT_TYPES.register(modEventBus);
         ITEM_REGISTRY.register(modEventBus);
         MENU_REGISTRY.register(modEventBus);
+        modEventBus.addListener(this::registerScreen);
+    }
+
+    public void registerScreen(RegisterConduitScreenExtensionsEvent event) {
+        event.register(Types.CHEMICAL.get(), ChemicalConduitScreenExtension::new);
     }
 
     @Override
