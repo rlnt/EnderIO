@@ -340,13 +340,13 @@ public abstract class MachineBlockEntity extends EIOBlockEntity
     }
 
     private void distributeItems(Direction side) {
-        IFluidHandler selfHandler = getSelfCapability(Capabilities.FluidHandler.BLOCK, side);
-        IFluidHandler otherHandler = getNeighbouringCapability(Capabilities.FluidHandler.BLOCK, side);
+        IItemHandler selfHandler = getSelfCapability(Capabilities.ItemHandler.BLOCK, side);
+        IItemHandler otherHandler = getNeighbouringCapability(Capabilities.ItemHandler.BLOCK, side);
         if (selfHandler == null || otherHandler == null) {
             return;
         }
 
-        TransferUtil.distributeFluids(getIOMode(side), selfHandler, otherHandler);
+        TransferUtil.distributeItems(getIOMode(side), selfHandler, otherHandler);
     }
 
     private void distributeFluids(Direction side) {
