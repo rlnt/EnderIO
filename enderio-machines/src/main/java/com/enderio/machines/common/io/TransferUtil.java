@@ -30,9 +30,11 @@ public class TransferUtil {
             ItemStack extracted = from.extractItem(i, from.getSlotLimit(i), true);
             if (!extracted.isEmpty()) {
                 for (int j = 0; j < to.getSlots(); j++) {
-                    ItemStack inserted = to.insertItem(j, extracted, false);
-                    if (inserted.isEmpty()) {
-                        from.extractItem(i, extracted.getCount(), false);
+                    ItemStack remainder = to.insertItem(j, extracted, false);
+                    
+                    int successfullyMoved = extracted.getCount() - remainder.getCount();
+                    if (successfullyMoved > 0) {
+                        from.extractItem(i, extracted.getCount() - remainder.getCount(), false);
                         return; // TODO: possibly do all slots?
                     }
                 }
