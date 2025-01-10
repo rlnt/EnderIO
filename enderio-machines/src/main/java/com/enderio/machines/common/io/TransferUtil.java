@@ -31,11 +31,15 @@ public class TransferUtil {
             if (!extracted.isEmpty()) {
                 for (int j = 0; j < to.getSlots(); j++) {
                     ItemStack remainder = to.insertItem(j, extracted, false);
-                    
+
                     int successfullyMoved = extracted.getCount() - remainder.getCount();
                     if (successfullyMoved > 0) {
                         from.extractItem(i, extracted.getCount() - remainder.getCount(), false);
-                        return; // TODO: possibly do all slots?
+                    }
+
+                    // If there is no remainder, take from the next "from" slot.
+                    if (remainder.getCount() <= 0) {
+                        break;
                     }
                 }
             }
