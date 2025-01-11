@@ -391,6 +391,7 @@ public abstract class MachineBlockEntity extends EIOBlockEntity
         }
 
         states.add(state);
+        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
     }
 
     @UseOnly(LogicalSide.SERVER)
@@ -400,6 +401,7 @@ public abstract class MachineBlockEntity extends EIOBlockEntity
         }
 
         states.remove(state);
+        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
     }
 
     // endregion
@@ -447,7 +449,7 @@ public abstract class MachineBlockEntity extends EIOBlockEntity
     private void checkIsRedstoneBlocked() {
         if (supportsRedstoneControl()) {
             isRedstoneBlocked = !redstoneControl.isActive(isRedstonePowered());
-            updateMachineState(MachineState.REDSTONE, !isRedstoneBlocked);
+            updateMachineState(MachineState.REDSTONE, isRedstoneBlocked);
         }
     }
 
