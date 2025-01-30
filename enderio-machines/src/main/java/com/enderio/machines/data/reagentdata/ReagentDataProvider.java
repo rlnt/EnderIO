@@ -33,8 +33,10 @@ public class ReagentDataProvider implements DataProvider {
     }
 
     protected void gather() {
+        // FIXME: GH-989, don't add wheat to c:seeds
+        // also it's weird to re-add wheat to c:crops, but that's less severe.
         addReagent(Items.WHEAT, Tags.Items.CROPS, 3D);
-        addReagent(Items.WHEAT, Tags.Items.SEEDS, 2D);
+//        addReagent(Items.WHEAT, Tags.Items.SEEDS, 2D);
     }
 
     @Override
