@@ -15,8 +15,6 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.IntrinsicHolderTagsProvider;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.DataMapProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
@@ -33,10 +31,6 @@ public class ReagentDataProvider implements DataProvider {
     }
 
     protected void gather() {
-        // FIXME: GH-989, don't add wheat to c:seeds
-        // also it's weird to re-add wheat to c:crops, but that's less severe.
-        addReagent(Items.WHEAT, Tags.Items.CROPS, 3D);
-//        addReagent(Items.WHEAT, Tags.Items.SEEDS, 2D);
     }
 
     @Override
